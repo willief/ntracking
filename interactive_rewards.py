@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import os
+import warnings warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
 datadir = os.path.join(user_home, ".local", "share", "safe", "tools", "rewards_plotting")
