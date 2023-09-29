@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import os
 import glob
 import warnings
@@ -38,7 +39,6 @@ def convert_value(value, format_type, default=0):
 def combined_extract_data(filenames):
     all_data = []
 
-    # This part is common for both requirements
     for file_number, filename in enumerate(filenames):
         with open(filename, "r") as file:
             lines = file.readlines()
@@ -121,7 +121,6 @@ def rewards_visualize(df):
         yaxis_title_text=""
     )
 
-
     for trace in fig.data:
         trace.hovertemplate = custom_hovertemplate
 
@@ -144,7 +143,7 @@ def rewards_visualize(df):
                     #dict(count=6, label="6 months", step="month", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
-                font=dict(color="#ffffff"),  # Changing the color of the range selector text
+                font=dict(color="#ffffff"),  # range selector text
                 bgcolor='#424241'
             ),
             type="date",
@@ -156,7 +155,7 @@ def rewards_visualize(df):
         font=dict(color='#ffffff')
     )                      
 
-    # Specify the path and save the figure
+    # Specify the path
     output_html_path = os.path.join(datadir, "rewards_balance_plot.html")
     fig.write_html(output_html_path)
 
@@ -169,7 +168,7 @@ def memory_visualize(df):
         color_discrete_map=pid_to_color)
 
 
-    # Hide the x-axis labels (Timestamp)
+    # Hide the x-axis labels
     fig.update_layout(
         xaxis_title_text="Memory Over Time",
         yaxis_title_text=""
@@ -193,7 +192,7 @@ def memory_visualize(df):
                     dict(count=7, label=" Week", step="day", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
-                font=dict(color="#ffffff"),  # Changing the color of the range selector text
+                font=dict(color="#ffffff"),  # range selector text
                 bgcolor='#424241'
             ),
             type="date",
@@ -205,7 +204,6 @@ def memory_visualize(df):
         font=dict(color='#ffffff')
     )  
 
-    # Specify the path and save the figure
     output_html_path = os.path.join(datadir, "memory_usage_plot.html")
     fig.write_html(output_html_path) 
 
@@ -223,8 +221,8 @@ def logarithmic_bubble_visualize(df):
                  size_max=100)
     
     fig.update_traces(
-        hovertemplate="Number: %{customdata[0]}<br>Node: %{customdata[1]}<br>PID: %{customdata[2]}<br>Rewards balance: %{customdata[3]:.9f}<br>Records: %{customdata[4]}<extra></extra>",  # Added Records here
-        marker=dict(line=dict(width=0.5, color='#252526')),  # this makes the hover border color consistent
+        hovertemplate="Number: %{customdata[0]}<br>Node: %{customdata[1]}<br>PID: %{customdata[2]}<br>Rewards balance: %{customdata[3]:.9f}<br>Records: %{customdata[4]}<extra></extra>", 
+        marker=dict(line=dict(width=0.5, color='#252526')),
         selector=dict(mode='markers+text')
     )
     
@@ -237,19 +235,136 @@ def logarithmic_bubble_visualize(df):
         yaxis=dict(showgrid=False, visible=False),
         legend_title_font_color='#ffffff',
         legend_font_color='#ffffff',
-        hoverlabel=dict(bgcolor='#252526', font_color='#ffffff'),  # consistent hover box color
-        showlegend=False  # Hides the legend
+        hoverlabel=dict(bgcolor='#252526', font_color='#ffffff'),
+        showlegend=False 
     )
     
     # Remove x and y from hover labels
-    # Remove x and y from hover labels
     fig.update_traces(hovertemplate="Number: %{customdata[0]}<br>Node: %{customdata[1]}<br>Rewards balance: %{customdata[3]:.9f}<br>Records: %{customdata[4]}<extra></extra>")
 
-    # Specify the path and save the figure
     output_html_path = os.path.join(datadir, "bubble_rewards.html")
     fig.write_html(output_html_path) 
-# Scanning for log files in 'datadir'
 log_files = glob.glob(os.path.join(datadir, "resources*.log"))
+
+def get_durations_since_last_change():
+    log_files = glob.glob(os.path.join(datadir, "resources*.log"))
+    
+    if not log_files:
+        print("No log files found!")
+        return
+    
+    # Group the data by Node and sort by Timestamp
+    grouped_df = line_df.groupby("Node").apply(lambda x: x.sort_values("Timestamp", ascending=False)).reset_index(drop=True)
+    
+    # Store durations of no change for each node
+    no_change_durations = []
+
+    # For each node, calculate the duration since the last change in "Rewards balance"
+    for node, group in grouped_df.groupby("Node"):
+        last_reward = None
+        last_timestamp = None
+        for idx, row in group.iterrows():
+            if last_reward is None:
+                last_reward = row["Rewards balance"]
+                last_timestamp = row["Timestamp"]
+                continue
+            
+            if row["Rewards balance"] != last_reward:
+                duration = last_timestamp - row["Timestamp"]
+                no_change_durations.append({
+                    "Node": node,
+                    "PID": row["PID"],
+                    "Number": row["Number"],
+                    "Duration": duration
+                })
+                break
+    
+    # Convert the list to a DataFrame and sort by Duration
+    durations_df = pd.DataFrame(no_change_durations).sort_values(by="Duration")
+    
+    # Get the 20 most recent and 20 least recent durations
+    most_recent = durations_df.head(20)
+    least_recent = durations_df.tail(20)
+    
+    return most_recent, least_recent
+
+file_list = glob.glob(os.path.join(datadir, "resources*.log"))
+line_df, _ = combined_extract_data(file_list)
+
+most_recent, least_recent = get_durations_since_last_change()
+
+desired_columns_order = ['Number', 'PID', 'Node', 'Duration']
+
+print("15 Most recent rewarded nodes:")
+print(most_recent[desired_columns_order].to_string(index=False))
+
+print("\n15 Biggest skivers. :")
+print(least_recent[desired_columns_order].to_string(index=False))
+
+def visualize_durations(most_recent, least_recent):
+    all_pids = pd.concat([most_recent['PID'], least_recent['PID']]).unique()
+    pid_to_color = generate_pid_to_color(sorted(all_pids))
+
+    fig = go.Figure()
+
+    hovertemplate = (
+        "Node: %{x}<br>" +
+        "Number: %{customdata[0]}<br>" +
+        "PID: %{customdata[1]}<br>" +
+        "Duration: %{y:.2f} hours<br>"
+    )
+
+    # Plot most recent durations
+    fig.add_trace(go.Bar(
+        x=most_recent['Node'],
+        y=most_recent['Duration'].dt.total_seconds() / (60*60),
+        name='Most Recent',
+        marker_color=[pid_to_color[pid] for pid in most_recent['PID']],
+        customdata=most_recent[['Number', 'PID']],
+        hovertemplate=hovertemplate
+    ))
+
+    # Plot least recent durations
+    fig.add_trace(go.Bar(
+        x=least_recent['Node'],
+        y=least_recent['Duration'].dt.total_seconds() / (60*60),
+        name='Least Recent',
+        marker_color=[pid_to_color[pid] for pid in least_recent['PID']],
+        customdata=least_recent[['Number', 'PID']],
+        hovertemplate=hovertemplate
+    ))
+
+    fig.update_layout(
+        xaxis_title_text="",
+        yaxis_title_text="",
+        hovermode='closest',
+        paper_bgcolor='#252526',
+        plot_bgcolor='#070D0D',
+        margin=dict(t=32, b=32, l=32, r=32, pad=2),
+        xaxis=dict(showgrid=False, visible=False),
+        yaxis=dict(
+            showgrid=False, 
+            visible=True,
+            tickcolor='#ffffff',
+            tickfont=dict(color='#ffffff')
+        ),
+        legend_title_font_color='#ffffff',
+        legend_font_color='#ffffff',
+        hoverlabel=dict(bgcolor='#252526', font=dict(color='#ffffff')),
+        barmode='group',
+        showlegend=False
+    )
+    fig.add_annotation(
+    text="<-- 20 Most recent <-- Time elapsed since last Reward --> 20 Least Recent -->",
+    xref="paper", yref="paper",
+    x=0.5, y=-0.01,  # position the text at the center bottom of the y-axis
+    showarrow=False,
+    yanchor="top",
+    font=dict(size=14, color="#ffffff") 
+    )
+
+    output_html_path = os.path.join(datadir, "durations.html")
+    fig.write_html(output_html_path)
 
 if not log_files:
     print("No log files found!")
@@ -260,3 +375,4 @@ if __name__ == "__main__":
     rewards_visualize(line_df)
     memory_visualize(line_df)
     logarithmic_bubble_visualize(bubble_df)
+    visualize_durations(most_recent, least_recent)

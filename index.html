@@ -12,30 +12,34 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
   <!-- SVG favicon -->
   <link href="#chartLogo" rel="icon" type="image/svg+xml" />
+  
   <style>
+    * {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      margin-top: 50px;
-      background: linear-gradient(45deg,
-          #222,
-          #444);
-      /* subtle gradient */
+      margin-top: 30px;
+      background: black;
       color: rgba(244, 244, 244, 0.8);
-      /* slightly transparent text */
       text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
-      /* soft shadow */
     }
 
-    h4 {
+    .full-logo {
+      display: flex;
+      align-items: center;
+      margin-left: 20px;
+    }
+
+    .logo-text {
       color: rgba(255, 102, 0, 0.8);
-      /* slightly transparent orange */
-      margin-bottom: 20px;
-    }
-
-    h1:hover {
-      color: #ff6600;
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      font-size: 24px;
+      z-index: 0;
+      position: relative;
     }
 
     a {
@@ -66,11 +70,12 @@
       margin: 40px 0;
     }
 
-    /* Logo styling */
     .logo {
       display: inline-block;
       margin-right: 10px;
       vertical-align: middle;
+      z-index: 1;
+      margin-right: 10px;
     }
 
     #bar1,
@@ -80,7 +85,6 @@
       transition: transform 0.3s ease-in-out;
     }
 
-    /* Scale effect on hover */
     .logo:hover #bar1 {
       transform: scaleY(1.2);
     }
@@ -95,14 +99,20 @@
 
     .iframe-container {
       position: relative;
-      margin-bottom: 1px;
+      margin-bottom: 0px;
+    }
+
+    .iframe-container button {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 10;
     }
 
     .hide-individual-buttons button[onclick^="toggleFullscreen"] {
       display: none;
     }
 
-    /* Appearance of fullscreen buttons */
     .fullscreen-btn-style {
       background-color: rgba(255, 255, 255, 0.1);
       font-size: 10px;
@@ -120,7 +130,6 @@
       box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
     }
 
-    /* fullscreen buttons */
     .iframe-btn-position {
       position: absolute;
       top: 10px;
@@ -130,20 +139,82 @@
       float: left;
       box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
     }
-  </style>
+
+    #topContainer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 1px;
+    }
+
+    #logoContainer {
+        display: flex;
+        align-items: center;
+    }
+
+    #dataWindow {
+    width: 35%;
+    max-height: 150px;
+    overflow-y: scroll;
+    border: 1px solid rgba(252, 252, 252, 0);
+    background-color: transparent;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    margin-right: 5%;
+    text-align: left;
+    position: relative;
+}
+
+#dataWindow::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(rgba(252, 252, 252, 0), #0a0a0a);
+    pointer-events: none;
+}
+
+#dataWindow::-webkit-scrollbar {
+    width: 0;
+}
+
+#dataWindow pre {
+    white-space: pre-wrap;
+    font-family: 'Courier New', Courier, monospace;
+    text-align: left; 
+}
+
+
+</style>
 </head>
 
 <body>
-  <!-- SVG logo -->
-  <svg class="logo" height="50" id="chartLogo" width="50" xmlns="http://www.w3.org/2000/svg">
-    <!-- Background Circle -->
-    <circle cx="25" cy="25" fill="#2E2E2E" r="23" stroke="#FF6600" stroke-width="1.5"></circle>
-    <!-- Bar Chart - 3 bars -->
-    <rect fill="#FF6600" height="15" id="bar1" width="5" x="10" y="27.5"></rect>
-    <rect fill="#FF6600" height="25" id="bar2" width="5" x="20" y="20"></rect>
-    <rect fill="#FF6600" height="10" id="bar3" width="5" x="30" y="32.5"></rect>
-  </svg>
-  <h4>Safe Network Nodes Stats &amp; Tracking</h4>
+  
+<div id="topContainer">
+    <div id="logoContainer">
+        <div class="full-logo">
+
+    <svg class="logo" height="50" id="chartLogo" width="50" xmlns="http://www.w3.org/2000/svg">
+
+      <circle cx="25" cy="25" fill="#2E2E2E" r="23" stroke="#FF6600" stroke-width="1.5"></circle>
+
+      <rect fill="#FF6600" height="15" id="bar1" width="5" x="10" y="27.5"></rect>
+      <rect fill="#FF6600" height="25" id="bar2" width="5" x="20" y="20"></rect>
+      <rect fill="#FF6600" height="10" id="bar3" width="5" x="30" y="32.5"></rect>
+    </svg>
+
+    <span class="logo-text">Safe Network Nodes<br />Stats &amp; Tracking</span>
+  </div>
+    </div>
+    <div id="dataWindow">
+        <pre>{sorted_results_content}</pre>
+    </div>
+</div>
+
   <br />
   <button class="fullscreen-btn-style" onclick="toggleAllIframesFullscreen()">Fullscreen All</button>
   <div id="iframesContainer">
@@ -158,8 +229,7 @@
       <button class="iframe-btn-position fullscreen-btn-style"
         onclick="toggleFullscreen(this.nextElementSibling)">Full</button>
 
-      <iframe frameborder="0" height="400" src="rewards_balance_plot.html"
-        width="100%"></iframe>
+      <iframe frameborder="0" height="400" src="rewards_balance_plot.html" width="100%"></iframe>
     </div>
 
     <div class="iframe-container">
@@ -167,6 +237,12 @@
         onclick="toggleFullscreen(this.nextElementSibling)">Full</button>
 
       <iframe frameborder="0" height="400" src="memory_usage_plot.html" width="100%"></iframe>
+
+      <div class="iframe-container">
+        <button class="iframe-btn-position fullscreen-btn-style"
+          onclick="toggleFullscreen(this.nextElementSibling)">Full</button>
+  
+        <iframe frameborder="0" height="400" src="durations.html" width="100%"></iframe>
     </div>
   </div>
   <br />
@@ -190,27 +266,28 @@
       }
     }
 
-    function toggleAllIframesFullscreen() {
-      var containers = document.querySelectorAll('.iframe-container');
+function toggleAllIframesFullscreen() {
+  var containers = document.querySelectorAll('.iframe-container');
 
-      if (!document.fullscreenElement) {
-        containers.forEach(container => {
-          var iframe = container.querySelector("iframe");
-          iframe.style.height = "33.33vh";  
-          iframe.style.width = "100vw";   
-          container.classList.add('hide-individual-buttons'); 
-        });
-        document.getElementById("iframesContainer").requestFullscreen();
-      } else {
-        containers.forEach(container => {
-          var iframe = container.querySelector("iframe");
-          iframe.style.height = "400px";
-          iframe.style.width = "100%";
-          container.classList.remove('hide-individual-buttons'); 
-        });
-        document.exitFullscreen();
-      }
-    }
+  if (!document.fullscreenElement) {
+    containers.forEach(container => {
+      var iframe = container.querySelector("iframe");
+      iframe.style.height = "25vh";
+      iframe.style.width = "100vw";
+      container.classList.add('hide-individual-buttons');
+    });
+    document.getElementById("iframesContainer").requestFullscreen();
+  } else {
+    containers.forEach(container => {
+      var iframe = container.querySelector("iframe");
+      iframe.style.height = "400px";
+      iframe.style.width = "100%";
+      container.classList.remove('hide-individual-buttons');
+    });
+    document.exitFullscreen();
+  }
+}
+
 
     document.addEventListener("fullscreenchange", function () {
       var containers = document.querySelectorAll('.iframe-container');
@@ -230,6 +307,20 @@
 
 
   </script>
+
+<script>
+window.addEventListener('load', function() {
+    fetch('https://raw.githubusercontent.com/javages/javages.github.io/main/sorted_results.txt')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('dataWindow').innerHTML = '<pre>' + data + '</pre>';
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+});
+
+</script>
 </body>
 
 </html>
