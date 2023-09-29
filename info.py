@@ -1,4 +1,3 @@
-
 import re
 from datetime import datetime, timedelta
 import glob
@@ -21,6 +20,9 @@ def parse_log(file_path):
     dead_nodes = []  # List to store nodes with issues
     first_killed_info = None  # Placeholder for the first killed info
     
+    log_number_match = re.search(r"resources(\d+)\.log$", file_path)
+    log_number = int(log_number_match.group(1)) if log_number_match else 0
+    
     for entry in entries:
         number_match = re.search(number_pattern, entry)
         node_match = re.search(node_pattern, entry)
@@ -37,13 +39,13 @@ def parse_log(file_path):
                 'PID': int(pid_match.group(1)),
                 'Reward': float(reward_match.group(1)),
                 'Timestamp': timestamp,
-                'Status': status_match.group(1)
+                'Status': status_match.group(1),
+                'LogNumber': log_number  # Store the log number for this entry
             }
             parsed_entries.append(parsed_entry)
             
             identifier = (parsed_entry['Number'], parsed_entry['Node'], parsed_entry['PID'])
             
-            # Check if node has a dead status and hasn't been added to dead_nodes
             if parsed_entry['Status'] != 'running' and identifier not in [(x['Number'], x['Node'], x['PID']) for x in dead_nodes]:
                 dead_nodes.append(parsed_entry)
                 if first_killed_info is None:
@@ -62,7 +64,7 @@ def main():
         all_dead_nodes.extend(dead_nodes)
         if first_killed_info:
             all_first_killed_info = first_killed_info
-    
+
     unique_entries = {}
     for entry in all_entries:
         key = (entry['Number'], entry['Node'], entry['PID'])
@@ -72,20 +74,20 @@ def main():
     sorted_entries = sorted(unique_entries.values(), key=lambda x: x['Reward'], reverse=True)
     total_reward = sum([entry['Reward'] for entry in unique_entries.values()])
     
-    # Counting unique running and killed nodes
     running_nodes = set(entry['Node'] for entry in unique_entries.values() if entry['Status'] == 'running')
     killed_nodes = set(entry['Node'] for entry in unique_entries.values() if entry['Status'] == 'killed')
     
     with open("sorted_results.txt", "w") as outfile:
-        outfile.write("=== Node Info ===\n\n")
-        outfile.write(f"Total Rewards: {total_reward:.8f}\n\n")
-        outfile.write(f"Running Nodes: {len(running_nodes)}\n\n")
-        outfile.write(f"Dead Nodes: {len(killed_nodes)}\n\n")
-        
+        outfile.write("= Stats =\n")
+        outfile.write(f"Rewards: {total_reward:.8f}\n")
+        outfile.write(f"Running: {len(running_nodes)}\n")
+        outfile.write(f"Dead: {len(killed_nodes)}\n\n")
+        outfile.write("↓ more info ↓\n\n\n")
+
         if all_dead_nodes:
             outfile.write("=== Dead Nodes Details ===\n")
             for node in all_dead_nodes:
-                outfile.write(f"Number: {node['Number']}\n")
+                outfile.write(f"Number: {node['LogNumber']}:{node['Number']}\n")
                 outfile.write(f"Node: {node['Node']}\n")
                 outfile.write(f"PID: {node['PID']}\n")
                 outfile.write(f"Status: {node['Status']}\n")
@@ -99,10 +101,10 @@ def main():
 
             outfile.write("---------\n\n")
     
-        outfile.write("=== Best Earners Decending ===\n")
+        outfile.write("=== Best Earners Descending ===\n\n")
         
         for entry in sorted_entries:
-            outfile.write(f"Number: {entry['Number']}\n")
+            outfile.write(f"Number: {entry['LogNumber']}:{entry['Number']}\n")
             outfile.write(f"Node: {entry['Node']}\n")
             outfile.write(f"PID: {entry['PID']}\n")
             outfile.write(f"Rewards balance: {entry['Reward']:.8f}\n")
