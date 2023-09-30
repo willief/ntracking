@@ -25,7 +25,6 @@ chmod +x -v \
   install_prereqs.sh \
   ./resources.sh \
   ./create_graphs.sh
-  #./interactive_rewards.py
 
 # Get prerequisites by running install_prereqs.sh
 bash ./install_prereqs.sh
@@ -36,9 +35,15 @@ echo "This script will take a snapshot of your node/nodes resources and rewards 
 echo "The data will be appended to resources.log."
 echo ""
 echo ""
+
 crontab -l > tmpcron
-echo "*/10 * * * * /bin/bash $install_dir/resources.sh >> $install_dir/resources.log" >> tmpcron
-crontab tmpcron 
+
+# Check if the cron job entry already exists
+cron_entry="*/10 * * * * /bin/bash $install_dir/resources.sh >> $install_dir/resources.log"
+if ! grep -qF "$cron_entry" tmpcron; then
+    echo "$cron_entry" >> tmpcron
+    crontab tmpcron
+fi
 rm tmpcron
 
 # Installation completion message
