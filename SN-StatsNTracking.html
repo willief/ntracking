@@ -302,7 +302,7 @@ window.addEventListener('load', function() {
     fetch('sorted_results.txt')
         .then(response => response.text())
         .then(data => {
-            document.getElementById('dataWindow').innerHTML = '<pre>' + data + '</pre>';
+            document.querySelector('#dataWindow pre').textContent = data;
         })
         .catch(error => {
             console.error('Error fetching data:', error);
