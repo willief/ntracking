@@ -60,7 +60,7 @@ This job will take a snapshot of your node/nodes resources and rewards balance e
   ./create_graphs.sh
   ```
 
-### 4. Viewing the Graph == SN-StatsNTracking.html ==
+### 4. == View the Graphs SN-StatsNTracking.html ==
 
 - The resulting plot will be saved in the app directory as
 `~/.local/share/safe/tools/rewards_plotting/rewards_balance_plot.html`.
