@@ -1,17 +1,15 @@
 #!/bin/bash
 
-install_dir="${HOME}/.local/share/safe/tools/rewards_plotting"
+install_dir="${HOME}/.local/share/safe/tools/ntracking
 
 cd $install_dir
 
 # Activate virtual environment
 source $install_dir/RPvenv/bin/activate
 
-python3 ./interactive_rewards.py
+python3 ./all_graphs.py
 
-sleep 10
-python3 ./interactive_memory.py
+sleep 1
+python3 ./info.py
 
-sleep 10
-python3 ./bubble_rewards.py
 

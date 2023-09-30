@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
-datadir = os.path.join(user_home, ".local", "share", "safe", "tools", "rewards_plotting")
+datadir = os.path.join(user_home, ".local", "share", "safe", "tools", "ntracking")
 
 
 def convert_value(value, format_type, default=0):
@@ -39,7 +39,6 @@ def convert_value(value, format_type, default=0):
 def combined_extract_data(filenames):
     all_data = []
 
-    # This part is common for both requirements
     for file_number, filename in enumerate(filenames):
         with open(filename, "r") as file:
             lines = file.readlines()
@@ -51,7 +50,8 @@ def combined_extract_data(filenames):
             "CPU usage": "float_percent",
             "File descriptors": "int",
             "Rewards balance": "float",
-            "Number": "int"
+            "Number": "int",
+            "PID": "int"
         }
 
         data = []
@@ -74,6 +74,9 @@ def combined_extract_data(filenames):
                             entry_data[key] = f"{file_number + 1}:{value}"
                         else:
                             entry_data[key] = value
+
+                        if key == "PID":
+                            entry_data[key] = int(raw_value.strip())
 
                     idx += 1
                 data.append(entry_data)
@@ -102,17 +105,18 @@ def generate_Number_to_color(Number):
 
 # Visualization
 custom_hovertemplate = "%{customdata[7]}<br>" + \
+                       "PID: %{customdata[8]}<br>"+ \
                        "Records: %{customdata[1]}<br>" + \
-                       "Disk usage: %{customdata[2]}MB<br>" + \
+                       "Disk used: %{customdata[2]}MB<br>" + \
                        "Memory used: %{customdata[3]:.2f}MB<br>" + \
-                       "CPU usage: %{customdata[4]:.2f}%<br>" + \
+                       "CPU: %{customdata[4]:.2f}%<br>" + \
                        "File descriptors: %{customdata[5]}<br>"
 
 def rewards_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="Rewards balance", color="Number", line_group="Number",
         custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", 
-                               "File descriptors", "Rewards balance", "Node"],
+                               "File descriptors", "Rewards balance", "Node", "PID"],
         labels={"Rewards balance": "Rewards Balance"},
         color_discrete_map=Number_to_color)
 
@@ -121,7 +125,6 @@ def rewards_visualize(df):
         xaxis_title_text="Rewards Over Time",
         yaxis_title_text=""
     )
-
 
     for trace in fig.data:
         trace.hovertemplate = custom_hovertemplate
@@ -145,7 +148,7 @@ def rewards_visualize(df):
                     #dict(count=6, label="6 months", step="month", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
-                font=dict(color="#ffffff"),  # Changing the color of the range selector text
+                font=dict(color="#ffffff"),
                 bgcolor='#424241'
             ),
             type="date",
@@ -157,7 +160,6 @@ def rewards_visualize(df):
         font=dict(color='#ffffff')
     )                      
 
-    # Specify the path and save the figure
     output_html_path = os.path.join(datadir, "rewards_balance_plot.html")
     fig.write_html(output_html_path)
 
@@ -165,7 +167,7 @@ def memory_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="Memory used", color="Number", line_group="Number",
         custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", 
-                               "File descriptors", "Rewards balance", "Node"],
+                               "File descriptors", "Rewards balance", "Node", "PID"],
         labels={"Memory": "Memory Usage (MB)"},
         color_discrete_map=Number_to_color)
 
@@ -194,7 +196,7 @@ def memory_visualize(df):
                     dict(count=7, label=" Week", step="day", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
-                font=dict(color="#ffffff"),  # Changing the color of the range selector text
+                font=dict(color="#ffffff"),
                 bgcolor='#424241'
             ),
             type="date",
@@ -206,7 +208,6 @@ def memory_visualize(df):
         font=dict(color='#ffffff')
     )  
 
-    # Specify the path and save the figure
     output_html_path = os.path.join(datadir, "memory_usage_plot.html")
     fig.write_html(output_html_path) 
 
@@ -225,7 +226,7 @@ def logarithmic_bubble_visualize(df):
     
     fig.update_traces(
         hovertemplate="Number: %{customdata[0]}<br>Node: %{customdata[1]}<br>Number: %{customdata[2]}<br>Rewards balance: %{customdata[3]:.9f}<br>Records: %{customdata[4]}<extra></extra>",  # Added Records here
-        marker=dict(line=dict(width=0.5, color='#252526')),  # this makes the hover border color consistent
+        marker=dict(line=dict(width=0.5, color='#252526')),
         selector=dict(mode='markers+text')
     )
     
@@ -238,18 +239,17 @@ def logarithmic_bubble_visualize(df):
         yaxis=dict(showgrid=False, visible=False),
         legend_title_font_color='#ffffff',
         legend_font_color='#ffffff',
-        hoverlabel=dict(bgcolor='#252526', font_color='#ffffff'),  # consistent hover box color
-        showlegend=False  # Hides the legend
+        hoverlabel=dict(bgcolor='#252526', font_color='#ffffff'),
+        showlegend=False
     )
     
     # Remove x and y from hover labels
     # Remove x and y from hover labels
     fig.update_traces(hovertemplate="Number: %{customdata[0]}<br>Node: %{customdata[1]}<br>Rewards balance: %{customdata[3]:.9f}<br>Records: %{customdata[4]}<extra></extra>")
 
-    # Specify the path and save the figure
     output_html_path = os.path.join(datadir, "bubble_rewards.html")
     fig.write_html(output_html_path) 
-# Scanning for log files in 'datadir'
+
 log_files = glob.glob(os.path.join(datadir, "resources*.log"))
 
 def get_durations_since_last_change():
@@ -259,7 +259,7 @@ def get_durations_since_last_change():
         print("No log files found!")
         return
     
-    # Group the data by Node and sort by Timestamp
+
     grouped_df = line_df.groupby("Node").apply(lambda x: x.sort_values("Timestamp", ascending=False)).reset_index(drop=True)
     
     # Store durations of no change for each node
@@ -280,7 +280,7 @@ def get_durations_since_last_change():
                 no_change_durations.append({
                     "Node": node,
                     "Number": row["Number"],
-                    "Number": row["Number"],
+                    "PID": row["PID"],
                     "Duration": duration
                 })
                 break
@@ -299,10 +299,8 @@ line_df, _ = combined_extract_data(file_list)
 
 most_recent, least_recent = get_durations_since_last_change()
 
-# Define the desired order for the columns
-desired_columns_order = ['Number', 'Number', 'Node', 'Duration']
+desired_columns_order = ['PID', 'Number', 'Node', 'Duration']
 
-# Print the results without the index and in the desired column order
 print("15 Most recent rewarded nodes:")
 print(most_recent[desired_columns_order].to_string(index=False))
 
@@ -317,7 +315,7 @@ def visualize_durations(most_recent, least_recent):
 
     hovertemplate = (
         "Node: %{x}<br>" +
-        "Number: %{customdata[0]}<br>" +
+        "PID: %{customdata[0]}<br>" +
         "Number: %{customdata[1]}<br>" +
         "Duration: %{y:.2f} hours<br>"
     )
@@ -328,7 +326,7 @@ def visualize_durations(most_recent, least_recent):
         y=most_recent['Duration'].dt.total_seconds() / (60*60),  # Convert timedelta to hours
         name='Most Recent',
         marker_color=[Number_to_color[Number] for Number in most_recent['Number']],
-        customdata=most_recent[['Number', 'Number']],
+        customdata=most_recent[['PID', 'Number']],
         hovertemplate=hovertemplate
     ))
 
@@ -338,7 +336,7 @@ def visualize_durations(most_recent, least_recent):
         y=least_recent['Duration'].dt.total_seconds() / (60*60),  # Convert timedelta to hours
         name='Least Recent',
         marker_color=[Number_to_color[Number] for Number in least_recent['Number']],
-        customdata=least_recent[['Number', 'Number']],
+        customdata=least_recent[['PID', 'Number']],
         hovertemplate=hovertemplate
     ))
 
@@ -361,14 +359,14 @@ def visualize_durations(most_recent, least_recent):
         legend_font_color='#ffffff',
         hoverlabel=dict(bgcolor='#252526', font=dict(color='#ffffff')),
         barmode='group',
-        showlegend=False  # Hides the legend
+        showlegend=False
     )
     fig.add_annotation(
     text="<-- 20 Most recent <-- Time elapsed since last Reward --> 20 Least Recent -->",
     xref="paper", yref="paper",
-    x=0.5, y=-0.01,  # position the text at the center bottom of the y-axis
+    x=0.5, y=-0.01,  # position the text
     showarrow=False,
-    yanchor="top",  # anchor the text to the top side of the annotation
+    yanchor="top",  # anchor the text
     font=dict(size=14, color="#ffffff") 
     )
 

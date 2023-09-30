@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the installation directory
-install_dir="${HOME}/.local/share/safe/tools/rewards_plotting"
+install_dir="${HOME}/.local/share/safe/tools/ntracking"
 
 # Check if the directory doesn't exist, create it
 if [[ ! -d $install_dir ]]; then
@@ -43,9 +43,9 @@ rm tmpcron
 
 # Installation completion message
 echo ""
-echo "--------------------------Rewards Plotting installation is complete------------------------------"
+echo "--------------------------SN-StatNTracking installation is complete------------------------------"
 echo ""
 echo ""
 echo ""
 echo " Once you have run for a few hours and have enough data, you can generate the graph.  "
-echo " Your graph will be stored as ~/.local/share/safe/tools/rewards_plotting/rewards_balance_plot.html"
+echo " Your graph will be stored as ~/.local/share/safe/tools/ntracking/rewards_balance_plot.html"

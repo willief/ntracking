@@ -9,6 +9,9 @@ pip3 install pandas
 
 echo "installing plotly"
 pip3 install plotly.express
+
+echo "installing matplotlib"
+pip3 install matplotlib
 echo ""
 echo ""
 echo "All required packages have been installed"
