@@ -1,4 +1,4 @@
-#!${HOME}/.local/share/safe/tools/rewards_plotting/RPvenv/bin/python
+#!${HOME}/.local/share/safe/tools/SN-StatsNTracking/RPvenv/bin/python
 
 # Display the version of pip
 pip --version

@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
-datadir = os.path.join(user_home, ".local", "share", "safe", "tools", "ntracking")
+datadir = os.path.join(user_home, ".local", "share", "safe", "tools", "SN-StatsNTracking")
 
 
 def convert_value(value, format_type, default=0):

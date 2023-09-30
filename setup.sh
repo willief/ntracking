@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the installation directory
-install_dir="${HOME}/.local/share/safe/tools/ntracking"
+install_dir="${HOME}/.local/share/safe/tools/SN-StatsNTracking"
 
 # Check if the directory doesn't exist, create it
 if [[ ! -d $install_dir ]]; then
@@ -48,4 +48,5 @@ echo ""
 echo ""
 echo ""
 echo " Once you have run for a few hours and have enough data, you can generate the graph.  "
-echo " Your graph will be stored as ~/.local/share/safe/tools/ntracking/rewards_balance_plot.html"
+echo " Your graphs will be stored as ~/.local/share/safe/tools/ntracking/"
+echo " Use SN-StatsNTracking.html to view them."
