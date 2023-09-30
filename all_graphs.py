@@ -101,7 +101,7 @@ def generate_Number_to_color(Number):
     return {Number: Number_colors_str[i] for i, Number in enumerate(Number)}
 
 # Visualization
-custom_hovertemplate = "%{customdata[0]}<br>" + \
+custom_hovertemplate = "%{customdata[7]}<br>" + \
                        "Records: %{customdata[1]}<br>" + \
                        "Disk usage: %{customdata[2]}MB<br>" + \
                        "Memory used: %{customdata[3]:.2f}MB<br>" + \
@@ -112,7 +112,7 @@ def rewards_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="Rewards balance", color="Number", line_group="Number",
         custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", 
-                               "File descriptors", "Rewards balance"],
+                               "File descriptors", "Rewards balance", "Node"],
         labels={"Rewards balance": "Rewards Balance"},
         color_discrete_map=Number_to_color)
 
@@ -165,7 +165,7 @@ def memory_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="Memory used", color="Number", line_group="Number",
         custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", 
-                               "File descriptors", "Rewards balance"],
+                               "File descriptors", "Rewards balance", "Node"],
         labels={"Memory": "Memory Usage (MB)"},
         color_discrete_map=Number_to_color)
 
