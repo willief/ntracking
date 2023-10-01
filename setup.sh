@@ -75,7 +75,7 @@ echo ""
 echo "--------------------------SN-StatNTracking installation is complete------------------------------"
 echo ""
 echo ""
-echo " Once you have run for a few hours and have enough data, you can generate the graph.  "
+echo " Once you have run for a few hours and have enough data, you can generate the graphs.  "
 echo " Your graphs will be stored as ~/.local/share/safe/tools/ntracking/"
 echo " Use SN-StatsNTracking.html to view them."
 
