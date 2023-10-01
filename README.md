@@ -35,7 +35,7 @@ All necessary permissions and crontab entries are now set by the script.
 
 ### 2. Cron Job Setup
 
-- The setup script will add the following entry to your crontab 
+- The setup script will add the following entry to your crontab with the option to add a second to also automate graph creation.
 
 ```bash
   */10 * * * * /bin/bash $(HOME)/.local/share/safe/tools/Rewards_plotting/resources.sh >> $(HOME)/.local/share/safe/tools/Rewards_plotting/resources.log 2>&1
@@ -62,7 +62,18 @@ This job will take a snapshot of your node/nodes resources and rewards balance e
 
 ### 4. View the Graphs SN-StatsNTracking.html
 
-- The resulting plot will be saved in the app directory as
-`~/.local/share/safe/tools/rewards_plotting/rewards_balance_plot.html`.
-- This graph is interactive: you can zoom in, select specific nodes, and more using most browsers.    Issues have been reported with Firefox, Brave is known to work well.
+- The resulting plots will be saved in the app directory at
+`~/.local/share/safe/tools/SN-StatsNTracking/`.
+- The graphs are interactive: you can zoom in, select specific nodes, and more using most browsers.
+
+For all functionality of SN-StatsNTracking.html to work locally you will need to:
+`cd .local/share/safe/tools/SN-StatsNTracking`
+`source /RPvenv/bin/activate`
+`python -m http.server`
+Open your browser and navigate to 
+`http://localhost:8000`
+Open `SN-StatsNTracking.html` from list of displayed files.
+This can be left open, it will refresh/update periodically if you chose to auto generate graphs. 
+
+To end the session return to your terminal and `Ctrl + C`
 

@@ -10,7 +10,7 @@ fi
 
 # Copy assets to the installation directory
 for file in *; do
-    cp -v  $file $install_dir;
+    cp -v $file $install_dir
 done
 
 #Install venv
@@ -23,35 +23,59 @@ source $install_dir/RPvenv/bin/activate
 # Sort permissions for certain scripts
 chmod +x -v \
   install_prereqs.sh \
-  ./resources.sh \
-  ./create_graphs.sh
-
+  create_graphs.sh \
+  resorces.sh
+ 
 # Get prerequisites by running install_prereqs.sh
 bash ./install_prereqs.sh
 
-# Set up a cron job to periodically run resources.sh
-echo ""
-echo "This script will take a snapshot of your node/nodes resources and rewards balance every 10 minutes."
-echo "The data will be appended to resources.log."
-echo ""
-echo ""
+read -p "Do you want to set up the cronjob now? it is need for this to work! (yes/no) " answer
 
-crontab -l > tmpcron
+if [ "$answer" == "yes" ]; then
+    # Set up the first cronjob without any user options
+    (crontab -l 2>/dev/null; echo "*/10 * * * * /bin/bash ${HOME}/.local/share/safe/tools/Rewards_plotting/resources.sh >> ${HOME}/.local/share/safe/tools/Rewards_plotting/resources.log 2>&1") | crontab -
+    
+    # Ask user about setting up automatic graph creation
+    read -p "Would you like to automate the graph creation? (yes/no) " graph_answer
 
-# Check if the cron job entry already exists
-cron_entry="*/10 * * * * /bin/bash $install_dir/resources.sh >> $install_dir/resources.log"
-if ! grep -qF "$cron_entry" tmpcron; then
-    echo "$cron_entry" >> tmpcron
-    crontab tmpcron
+    if [ "$graph_answer" == "yes" ]; then
+        read -p "How often would you like the graphs created? (30 min, 1 hour, 5 hours, 12 hours) " frequency
+
+        # Convert frequency to cron syntax
+        case "$frequency" in
+            "30 min")
+                cron_time="*/30 * * * *"
+                ;;
+            "1 hour")
+                cron_time="0 * * * *"
+                ;;
+            "5 hours")
+                cron_time="0 */5 * * *"
+                ;;
+            "12 hours")
+                cron_time="0 */12 * * *"
+                ;;
+            *)
+                echo "Unsupported frequency. Exiting."
+                exit 1
+                ;;
+        esac
+
+        # Add the cronjob for graph creation
+        (crontab -l 2>/dev/null; echo "$cron_time $install_dir/create_graphs.sh") | crontab -
+    fi
+    
+    echo "Setup complete. Remember, if you no longer need these cronjobs, you can remove them by running 'crontab -e' in the terminal and deleting the corresponding lines."
+else
+    echo "Cronjob setup skipped."
 fi
-rm tmpcron
 
 # Installation completion message
 echo ""
 echo "--------------------------SN-StatNTracking installation is complete------------------------------"
 echo ""
 echo ""
-echo ""
 echo " Once you have run for a few hours and have enough data, you can generate the graph.  "
 echo " Your graphs will be stored as ~/.local/share/safe/tools/ntracking/"
 echo " Use SN-StatsNTracking.html to view them."
+
