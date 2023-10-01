@@ -66,7 +66,9 @@ This job will take a snapshot of your node/nodes resources and rewards balance e
 `~/.local/share/safe/tools/SN-StatsNTracking/`.
 - The graphs are interactive: you can zoom in, select specific nodes, and more using most browsers.
 
-For all functionality of SN-StatsNTracking.html to work locally you will need to:
+You can open the graphs directly or with SN-StatsNTracking.html.
+
+For ALL functionality of SN-StatsNTracking.html to work locally you will need to:
 `cd .local/share/safe/tools/SN-StatsNTracking`
 `source /RPvenv/bin/activate`
 `python -m http.server`

@@ -23,8 +23,8 @@ source $install_dir/RPvenv/bin/activate
 # Sort permissions for certain scripts
 chmod +x -v \
   install_prereqs.sh \
-  create_graphs.sh \
-  resorces.sh
+  ./resources.sh \
+  ./create_graphs.sh
  
 # Get prerequisites by running install_prereqs.sh
 bash ./install_prereqs.sh
@@ -39,7 +39,7 @@ if [ "$answer" == "yes" ]; then
     read -p "Would you like to automate the graph creation? (yes/no) " graph_answer
 
     if [ "$graph_answer" == "yes" ]; then
-        read -p "How often would you like the graphs created? (30 min, 1 hour, 5 hours, 12 hours) " frequency
+        read -p "How often would you like the graphs created? every (30 min, 1 hour, 5 hours, 12 hours) " frequency
 
         # Convert frequency to cron syntax
         case "$frequency" in
@@ -75,7 +75,8 @@ echo ""
 echo "--------------------------SN-StatNTracking installation is complete------------------------------"
 echo ""
 echo ""
-echo " Once you have run for a few hours and have enough data, you can generate the graphs.  "
-echo " Your graphs will be stored as ~/.local/share/safe/tools/ntracking/"
-echo " Use SN-StatsNTracking.html to view them."
+echo " Once you have run for a few hours and have enough data, you can generate your graphs.  "
+echo " Your graphs will be stored at ~/.local/share/safe/tools/ntracking/"
+echo " Use SN-StatsNTracking.html to view them, or open them directly."
+
 
