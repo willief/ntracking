@@ -1,4 +1,4 @@
-# SN Nodes Stats & Tracking 
+# SN Node Tracking 
 See https://javages.github.io
 
 Track Safe Network nodes.
@@ -12,17 +12,19 @@ Track Safe Network nodes.
 
 ## Setup
 
+- These instructions assume that SNstatsNTracking has been copied to `.local/share/safe/tools/`
+
 - Ensure the script is executable:
 
   ```bash
-  chmod +x path_to_script/setup.sh
+  chmod +x setup.sh
 
   ```
 
 - Execute the script
 
  ```bash
-  ./path_to_script/setup.sh
+  ./setup.sh
 
   ```
 
