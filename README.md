@@ -12,7 +12,7 @@ Track Safe Network nodes.
 
 ## Setup
 
-- These instructions assume that SNstatsNTracking has been copied to `.local/share/safe/tools/`
+- These instructions assume that ntracking has been copied to `.local/share/safe/tools/`
 
 - Ensure the script is executable:
 
@@ -32,7 +32,7 @@ Track Safe Network nodes.
 
 ### 1. Script Placement & Permissions
 
-This script will install to $(HOME)/.local/share/safe/tools/Rewards_plotting; modify as needed.
+This script will install to $(HOME)/.local/share/safe/tools/ntracking; modify as needed.
 All necessary permissions and crontab entries are now set by the script.
 
 ### 2. Cron Job Setup
@@ -40,7 +40,7 @@ All necessary permissions and crontab entries are now set by the script.
 - The setup script will add the following entry to your crontab with the option to add a second to also automate graph creation.
 
 ```bash
-  */10 * * * * /bin/bash $(HOME)/.local/share/safe/tools/Rewards_plotting/resources.sh >> $(HOME)/.local/share/safe/tools/Rewards_plotting/resources.log 2>&1
+  */10 * * * * /bin/bash $(HOME)/.local/share/safe/tools/ntracking/resources.sh >> $(HOME)/.local/share/safe/tools/ntracking/resources.log 2>&1
   ```
   
 This job will take a snapshot of your node/nodes resources and rewards balance every 10 minutes. The data will be appended to `resources.log`.
@@ -62,21 +62,21 @@ This job will take a snapshot of your node/nodes resources and rewards balance e
   ./create_graphs.sh
   ```
 
-### 4. View the Graphs SN-StatsNTracking.html
+### 4. View the Graphs ntracking.html
 
 - The resulting plots will be saved in the app directory at
-`~/.local/share/safe/tools/SN-StatsNTracking/`.
+`~/.local/share/safe/tools/ntracking/`.
 - The graphs are interactive: you can zoom in, select specific nodes, and more using most browsers.
 
-You can open the graphs directly or with SN-StatsNTracking.html.
+You can open the graphs directly or with ntracking.html.
 
-For ALL functionality of SN-StatsNTracking.html to work locally you will need to:
-`cd .local/share/safe/tools/SN-StatsNTracking`
+For ALL functionality of ntracking.html to work locally you will need to:
+`cd .local/share/safe/tools/ntracking`
 `source /RPvenv/bin/activate`
 `python -m http.server`
 Open your browser and navigate to 
 `http://localhost:8000`
-Open `SN-StatsNTracking.html` from list of displayed files.
+Open `ntracking.html` from list of displayed files.
 This can be left open, it will refresh/update periodically if you chose to auto generate graphs. 
 
 To end the session return to your terminal and `Ctrl + C`

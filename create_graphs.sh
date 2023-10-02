@@ -1,6 +1,6 @@
 #!/bin/bash
 
-install_dir="${HOME}/.local/share/safe/tools/SN-StatsNTracking"
+install_dir="${HOME}/.local/share/safe/tools/ntracking"
 
 cd $install_dir
 

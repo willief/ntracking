@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
-datadir = os.path.join(user_home, ".local", "share", "safe", "tools", "SN-StatsNTracking")
+datadir = os.path.join(user_home, ".local", "share", "safe", "tools", "ntracking")
 
 
 def convert_value(value, format_type, default=0):
@@ -281,6 +281,8 @@ def get_durations_since_last_change():
                     "Node": node,
                     "Number": row["Number"],
                     "PID": row["PID"],
+                    "Records": row["Records"],
+                    "Rewards balance": row["Rewards balance"],
                     "Duration": duration
                 })
                 break
@@ -299,7 +301,7 @@ line_df, _ = combined_extract_data(file_list)
 
 most_recent, least_recent = get_durations_since_last_change()
 
-desired_columns_order = ['PID', 'Number', 'Node', 'Duration']
+desired_columns_order = ['PID', 'Number', 'Node', 'Records', 'Rewards balance', 'Duration']
 
 print("15 Most recent rewarded nodes:")
 print(most_recent[desired_columns_order].to_string(index=False))
@@ -317,6 +319,8 @@ def visualize_durations(most_recent, least_recent):
         "Node: %{x}<br>" +
         "PID: %{customdata[0]}<br>" +
         "Number: %{customdata[1]}<br>" +
+        "Records: %{customdata[2]}<br>" +
+        "Rewards Balance: %{customdata[3]}<br>" +
         "Duration: %{y:.2f} hours<br>"
     )
 
@@ -326,7 +330,7 @@ def visualize_durations(most_recent, least_recent):
         y=most_recent['Duration'].dt.total_seconds() / (60*60),  # Convert timedelta to hours
         name='Most Recent',
         marker_color=[Number_to_color[Number] for Number in most_recent['Number']],
-        customdata=most_recent[['PID', 'Number']],
+        customdata=most_recent[['PID', 'Number', 'Records', 'Rewards balance']],
         hovertemplate=hovertemplate
     ))
 
@@ -336,7 +340,7 @@ def visualize_durations(most_recent, least_recent):
         y=least_recent['Duration'].dt.total_seconds() / (60*60),  # Convert timedelta to hours
         name='Least Recent',
         marker_color=[Number_to_color[Number] for Number in least_recent['Number']],
-        customdata=least_recent[['PID', 'Number']],
+        customdata=least_recent[['PID', 'Number', 'Records', 'Rewards balance']],
         hovertemplate=hovertemplate
     ))
 

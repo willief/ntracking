@@ -1,4 +1,6 @@
-#!${HOME}/.local/share/safe/tools/SN-StatsNTracking/RPvenv/bin/python
+#!/bin/bash
+
+#!${HOME}/.local/share/safe/tools/ntracking/RPvenv/bin/python
 
 # Display the version of pip
 pip --version
