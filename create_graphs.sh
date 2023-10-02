@@ -10,6 +10,6 @@ source $install_dir/RPvenv/bin/activate
 python3 ./all_graphs.py
 
 sleep 1
-python3 ./info.py
+python3 ./node_info.py
 
 

@@ -299,7 +299,7 @@ function toggleAllIframesFullscreen() {
 
 <script>
 window.addEventListener('load', function() {
-    fetch('sorted_results.txt')
+    fetch('node_info.txt')
         .then(response => response.text())
         .then(data => {
             document.querySelector('#dataWindow pre').textContent = data;
