@@ -37,6 +37,7 @@ def convert_value(value, format_type, default=0):
 
 
 def combined_extract_data(filenames):
+    filenames = sorted(filenames)
     all_data = []
 
     for file_number, filename in enumerate(filenames):
