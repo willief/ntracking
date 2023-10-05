@@ -11,7 +11,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 user_home = os.path.expanduser("~")
 datadir = os.path.join(user_home, ".local", "share", "safe", "tools", "ntracking")
 
-
 def convert_value(value, format_type, default=0):
     if format_type == 'float':
         try:
@@ -49,7 +48,7 @@ def combined_extract_data(filenames):
             "Records": "int",
             "Disk usage": "float_mb",
             "CPU usage": "float_percent",
-            "File descriptors": "int",
+	        "TCP connections (established)": "int",
             "Rewards balance": "float",
             "Number": "int",
             "PID": "int"
@@ -105,19 +104,16 @@ def generate_Number_to_color(Number):
     return {Number: Number_colors_str[i] for i, Number in enumerate(Number)}
 
 # Visualization
-custom_hovertemplate = "%{customdata[7]}<br>" + \
-                       "PID: %{customdata[8]}<br>"+ \
+custom_hovertemplate = "%{customdata[6]}<br>" + \
+                       "PID: %{customdata[7]}<br>"+ \
                        "Records: %{customdata[1]}<br>" + \
                        "Disk used: %{customdata[2]}MB<br>" + \
-                       "Memory used: %{customdata[3]:.2f}MB<br>" + \
-                       "CPU: %{customdata[4]:.2f}%<br>" + \
-                       "File descriptors: %{customdata[5]}<br>"
+                       "CPU: %{customdata[4]:.2f}%<br>"
 
 def rewards_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="Rewards balance", color="Number", line_group="Number",
-        custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", 
-                               "File descriptors", "Rewards balance", "Node", "PID"],
+        custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", "Rewards balance", "Node", "PID"],
         labels={"Rewards balance": "Rewards Balance"},
         color_discrete_map=Number_to_color)
 
@@ -167,8 +163,7 @@ def rewards_visualize(df):
 def memory_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="Memory used", color="Number", line_group="Number",
-        custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", 
-                               "File descriptors", "Rewards balance", "Node", "PID"],
+        custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", "Rewards balance", "Node", "PID"],
         labels={"Memory": "Memory Usage (MB)"},
         color_discrete_map=Number_to_color)
 
@@ -194,7 +189,7 @@ def memory_visualize(df):
                     dict(count=12, label=" 12 hours", step="hour", stepmode="backward"),
                     dict(count=1, label=" 24 hours", step="day", stepmode="backward"),
                     dict(count=3, label=" 3 days", step="day", stepmode="backward"),
-                    dict(count=7, label=" Week", step="day", stepmode="backward"),
+                    #dict(count=7, label=" Week", step="day", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -211,6 +206,53 @@ def memory_visualize(df):
 
     output_html_path = os.path.join(datadir, "memory_usage_plot.html")
     fig.write_html(output_html_path) 
+
+def tcp_visualize(df):
+    Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
+    fig = px.line(df, x="Timestamp", y="TCP connections (established)", color="Number", line_group="Number",
+        custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", "Rewards balance", "Node", "PID"],
+        labels={"Memory": "Memory Usage (MB)"},
+        color_discrete_map=Number_to_color)
+
+
+    # Hide the x-axis labels (Timestamp)
+    fig.update_layout(
+        xaxis_title_text="TCP connections (established)",
+        yaxis_title_text=""
+    )
+    for trace in fig.data:
+        trace.hovertemplate = custom_hovertemplate
+
+    fig.update_layout(
+        hovermode='y unified',
+        paper_bgcolor='#252526',
+        plot_bgcolor='#070D0D',
+        margin=dict(t=32, b=32, l=32, r=32, pad=2),
+        xaxis=dict(
+            rangeselector=dict(
+                buttons=[
+                    dict(count=3, label="3 hours", step="hour", stepmode="backward"),
+                    dict(count=6, label=" 6 hours", step="hour", stepmode="backward"),
+                    dict(count=12, label=" 12 hours", step="hour", stepmode="backward"),
+                    dict(count=1, label=" 24 hours", step="day", stepmode="backward"),
+                    dict(count=3, label=" 3 days", step="day", stepmode="backward"),
+                    #dict(count=7, label=" Week", step="day", stepmode="backward"),
+                    dict(step="all", label="All Data")
+                ],
+                font=dict(color="#ffffff"),
+                bgcolor='#424241'
+            ),
+            type="date",
+            showgrid=True, 
+            gridcolor='#171515', 
+            gridwidth=0.01
+        ),                
+        yaxis=dict(showgrid=True, gridcolor='#171515', gridwidth=0.01),
+        font=dict(color='#ffffff')
+    )  
+
+    output_html_path = os.path.join(datadir, "tcp.html")
+    fig.write_html(output_html_path)    
 
 def logarithmic_bubble_visualize(df):
     df["x"] = np.random.rand(len(df))
@@ -386,5 +428,7 @@ if __name__ == "__main__":
     line_df, bubble_df = combined_extract_data(log_files)
     rewards_visualize(line_df)
     memory_visualize(line_df)
+    tcp_visualize(line_df)
     logarithmic_bubble_visualize(bubble_df)
     visualize_durations(most_recent, least_recent)
+

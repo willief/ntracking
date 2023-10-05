@@ -1,13 +1,9 @@
 #!/bin/bash
 
-# Define the base directory for the safe node data
 base_dir="${HOME}/.local/share/safe/node"
-
-# Declare an associative array to store directory names and corresponding PIDs
 declare -A dir_pid
 node_number=0
 
-# Iterate through directories in the base directory
 for dir in "$base_dir"/*; do
   if [[ -f "$dir/safenode.pid" ]]; then
     dir_name=$(basename "$dir")
@@ -15,7 +11,6 @@ for dir in "$base_dir"/*; do
   fi
 done
 
-# Loop through directory names and associated PIDs
 for dir in "${!dir_pid[@]}"; do
   pid=${dir_pid[$dir]}
 
@@ -26,7 +21,6 @@ for dir in "${!dir_pid[@]}"; do
   echo "Node: $dir"
   echo "PID: $pid"
 
-  # Check if the process is running
   process_info=$(ps -o rss,%cpu -p $pid | awk 'NR>1')
   if [[ -n "$process_info" ]]; then
       status="running"
@@ -40,11 +34,12 @@ for dir in "${!dir_pid[@]}"; do
   echo "Memory used: $mem_used"
   echo "CPU usage: $cpu_usage"
 
-  # Count file descriptors for the process
-  file_descriptors=$(ls /proc/$pid/fd/ 2>/dev/null | wc -l)
-  echo "File descriptors: $file_descriptors"
+  #file_descriptors=$(ls /proc/$pid/fd/ 2>/dev/null | wc -l)
+  #echo "File descriptors: $file_descriptors"
+  
+  tcp_established=$(lsof -n -iTCP -a -p $pid 2>/dev/null | grep "ESTABLISHED" | wc -l)
+  echo "TCP connections (established): $tcp_established"
 
-  # Check if a "record_store" directory exists and display information if found
   record_store_dir="$base_dir/$dir/record_store"
   if [ -d "$record_store_dir" ]; then
     records=$(ls -1 $record_store_dir | wc -l)
@@ -56,7 +51,6 @@ for dir in "${!dir_pid[@]}"; do
     echo "$dir does not contain record_store"
   fi
 
-  # Retrieve rewards balance using the 'safe wallet balance' command
   rewards_balance=$(${HOME}/.local/bin/safe wallet balance --peer-id="$dir" | grep -oP '(?<=: )\d+\.\d+')
   echo "Rewards balance: $rewards_balance"
 
