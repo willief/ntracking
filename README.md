@@ -12,7 +12,7 @@ Track Safe Network nodes.
 
 ## Setup
 
-- These instructions assume that ntracking has been copied to `.local/share/safe/tools/`
+- These instructions assume that ntracking has been copied to `~/.ntracking`
 
 - Ensure the script is executable:
 
