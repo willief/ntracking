@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the installation directory
-install_dir="${HOME}/.local/share/safe/tools/ntracking"
+install_dir="${HOME}/ntracking"
 
 # Check if the directory doesn't exist, create it
 if [[ ! -d $install_dir ]]; then
@@ -33,7 +33,7 @@ read -p "Do you want to set up the cronjob now? it is need for this to work! (ye
 
 if [ "$answer" == "yes" ]; then
     # Set up the first cronjob without any user options
-    (crontab -l 2>/dev/null; echo "*/10 * * * * /bin/bash ${HOME}/.local/share/safe/tools/ntracking/resources.sh >> ${HOME}/.local/share/safe/tools/ntracking/resources.log 2>&1") | crontab -
+    (crontab -l 2>/dev/null; echo "*/10 * * * * /bin/bash ${HOME}/ntracking/resources.sh >> ${HOME}/ntracking/resources.log 2>&1") | crontab -
     
     # Ask user about setting up automatic graph creation
     read -p "Would you like to automate the graph creation? (yes/no) " graph_answer
@@ -76,7 +76,7 @@ echo "--------------------------NTracking installation is complete--------------
 echo ""
 echo ""
 echo " Once you have run for a few hours and have enough data, you can generate your graphs.  "
-echo " Your graphs will be stored at ~/.local/share/safe/tools/ntracking/"
+echo " Your graphs will be stored at ~/ntracking/"
 echo " Use NTracking.html to view them, or open them directly."
 
 

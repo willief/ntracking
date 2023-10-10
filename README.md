@@ -32,7 +32,7 @@ Track Safe Network nodes.
 
 ### 1. Script Placement & Permissions
 
-This script will install to $(HOME)/.local/share/safe/tools/ntracking; modify as needed.
+This script will install to $(HOME)/ntracking; modify as needed.
 All necessary permissions and crontab entries are now set by the script.
 
 ### 2. Cron Job Setup
@@ -40,7 +40,7 @@ All necessary permissions and crontab entries are now set by the script.
 - The setup script will add the following entry to your crontab with the option to add a second to also automate graph creation.
 
 ```bash
-  */10 * * * * /bin/bash $(HOME)/.local/share/safe/tools/ntracking/resources.sh >> $(HOME)/.local/share/safe/tools/ntracking/resources.log 2>&1
+  */10 * * * * /bin/bash $(HOME)/ntracking/resources.sh >> $(HOME)/ntracking/resources.log 2>&1
   ```
   
 This job will take a snapshot of your node/nodes resources and rewards balance every 10 minutes. The data will be appended to `resources.log`.
@@ -65,13 +65,13 @@ This job will take a snapshot of your node/nodes resources and rewards balance e
 ### 4. View the Graphs ntracking.html
 
 - The resulting plots will be saved in the app directory at
-`~/.local/share/safe/tools/ntracking/`.
+`~/ntracking/`.
 - The graphs are interactive: you can zoom in, select specific nodes, and more using most browsers.
 
 You can open the graphs directly or with ntracking.html.
 
 For ALL functionality of ntracking.html to work locally you will need to:
-`cd .local/share/safe/tools/ntracking`
+`cd ntracking`
 `source /RPvenv/bin/activate`
 `python -m http.server`
 Open your browser and navigate to 
