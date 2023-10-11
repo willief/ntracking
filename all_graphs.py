@@ -295,130 +295,40 @@ def logarithmic_bubble_visualize(df):
 
 log_files = glob.glob(os.path.join(datadir, "resources*.log"))
 
-def get_durations_since_last_change():
-    log_files = glob.glob(os.path.join(datadir, "resources*.log"))
-    
-    if not log_files:
-        print("No log files found!")
-        return
-    
 
-    grouped_df = line_df.groupby("Node").apply(lambda x: x.sort_values("Timestamp", ascending=False)).reset_index(drop=True)
-    
-    # Store durations of no change for each node
-    no_change_durations = []
+def records_visualize(df):
+    df['Record Count'] = df['Records']
+    df = df.sort_values('Record Count', ascending=True)
+    df = df.drop_duplicates(subset='Number', keep='last')
+    df['Record Count'] = df['Records']
+    Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
 
-    # For each node, calculate the duration since the last change in "Rewards balance"
-    for node, group in grouped_df.groupby("Node"):
-        last_reward = None
-        last_timestamp = None
-        for idx, row in group.iterrows():
-            if last_reward is None:
-                last_reward = row["Rewards balance"]
-                last_timestamp = row["Timestamp"]
-                continue
-            
-            if row["Rewards balance"] != last_reward:
-                duration = last_timestamp - row["Timestamp"]
-                no_change_durations.append({
-                    "Node": node,
-                    "Number": row["Number"],
-                    "PID": row["PID"],
-                    "Records": row["Records"],
-                    "Rewards balance": row["Rewards balance"],
-                    "Duration": duration
-                })
-                break
-    
-    # Convert the list to a DataFrame and sort by Duration
-    durations_df = pd.DataFrame(no_change_durations).sort_values(by="Duration")
-    
-    # Get the 20 most recent and 10 least recent durations
-    most_recent = durations_df.head(20)
-    least_recent = durations_df.tail(20)
-    
-    return most_recent, least_recent
-
-file_list = glob.glob(os.path.join(datadir, "resources*.log"))
-line_df, _ = combined_extract_data(file_list)
-
-most_recent, least_recent = get_durations_since_last_change()
-
-desired_columns_order = ['PID', 'Number', 'Node', 'Records', 'Rewards balance', 'Duration']
-
-print("15 Most recent rewarded nodes:")
-print(most_recent[desired_columns_order].to_string(index=False))
-
-print("\n15 Biggest skivers. :")
-print(least_recent[desired_columns_order].to_string(index=False))
-
-def visualize_durations(most_recent, least_recent):
-    all_Number = pd.concat([most_recent['Number'], least_recent['Number']]).unique()
-    Number_to_color = generate_Number_to_color(sorted(all_Number))
-
-    fig = go.Figure()
-
-    hovertemplate = (
-        "Node: %{x}<br>" +
-        "PID: %{customdata[0]}<br>" +
-        "Number: %{customdata[1]}<br>" +
-        "Records: %{customdata[2]}<br>" +
-        "Rewards Balance: %{customdata[3]}<br>" +
-        "Duration: %{y:.2f} hours<br>"
+    fig = px.bar(
+        df, 
+        x="Number", 
+        y="Record Count",
+        color="Number",
+        labels={"Record Count": "Record Count"},
+        color_discrete_map=Number_to_color,
+        opacity=1.0
     )
-
-    # Plot most recent durations
-    fig.add_trace(go.Bar(
-        x=most_recent['Node'],
-        y=most_recent['Duration'].dt.total_seconds() / (60*60),  # Convert timedelta to hours
-        name='Most Recent',
-        marker_color=[Number_to_color[Number] for Number in most_recent['Number']],
-        customdata=most_recent[['PID', 'Number', 'Records', 'Rewards balance']],
-        hovertemplate=hovertemplate
-    ))
-
-    # Plot least recent durations
-    fig.add_trace(go.Bar(
-        x=least_recent['Node'],
-        y=least_recent['Duration'].dt.total_seconds() / (60*60),  # Convert timedelta to hours
-        name='Least Recent',
-        marker_color=[Number_to_color[Number] for Number in least_recent['Number']],
-        customdata=least_recent[['PID', 'Number', 'Records', 'Rewards balance']],
-        hovertemplate=hovertemplate
-    ))
-
-    # Update layout
+    
     fig.update_layout(
-        xaxis_title_text="",
-        yaxis_title_text="",
-        hovermode='closest',
+        showlegend=False,
         paper_bgcolor='#252526',
         plot_bgcolor='#070D0D',
-        margin=dict(t=32, b=32, l=32, r=32, pad=2),
-        xaxis=dict(showgrid=False, visible=False),
+        margin=dict(t=32, b=32, l=32, r=32, pad=2),             
         yaxis=dict(
-            showgrid=False, 
-            visible=True,
-            tickcolor='#ffffff',
-            tickfont=dict(color='#ffffff')
+            showgrid=True, 
+            gridcolor='#171515', 
+            gridwidth=0.01,
         ),
-        legend_title_font_color='#ffffff',
-        legend_font_color='#ffffff',
-        hoverlabel=dict(bgcolor='#252526', font=dict(color='#ffffff')),
-        barmode='group',
-        showlegend=False
+        font=dict(color='#ffffff')
     )
-    fig.add_annotation(
-    text="<-- 20 Most recent <-- Time elapsed since last Reward --> 20 Least Recent -->",
-    xref="paper", yref="paper",
-    x=0.5, y=-0.01,  # position the text
-    showarrow=False,
-    yanchor="top",  # anchor the text
-    font=dict(size=14, color="#ffffff") 
-    )
-
-    output_html_path = os.path.join(datadir, "durations.html")
+    
+    output_html_path = os.path.join(datadir, "records.html")
     fig.write_html(output_html_path)
+
 
 if not log_files:
     print("No log files found!")
@@ -430,5 +340,4 @@ if __name__ == "__main__":
     memory_visualize(line_df)
     tcp_visualize(line_df)
     logarithmic_bubble_visualize(bubble_df)
-    visualize_durations(most_recent, least_recent)
-
+    records_visualize(line_df)
