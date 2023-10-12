@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
-datadir = os.path.join(user_home, "ntracking")
+datadir = os.path.join(user_home, "wyse_graphs")
 
 def convert_value(value, format_type, default=0):
     if format_type == 'float':
@@ -47,7 +47,6 @@ def combined_extract_data(filenames):
             "Memory used": "float_mb",
             "Records": "int",
             "Disk usage": "float_mb",
-            "CPU usage": "float_percent",
 	        "TCP connections (established)": "int",
             "Rewards balance": "float",
             "Number": "int",
@@ -104,16 +103,12 @@ def generate_Number_to_color(Number):
     return {Number: Number_colors_str[i] for i, Number in enumerate(Number)}
 
 # Visualization
-custom_hovertemplate = "%{customdata[6]}<br>" + \
-                       "PID: %{customdata[7]}<br>"+ \
-                       "Records: %{customdata[1]}<br>" + \
-                       "Disk used: %{customdata[2]}MB<br>" + \
-                       "CPU: %{customdata[4]:.2f}%<br>"
+custom_hovertemplate = "%{customdata[3]}<br>"
 
 def rewards_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="Rewards balance", color="Number", line_group="Number",
-        custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", "Rewards balance", "Node", "PID"],
+        custom_data=["Number", "Rewards balance", "Node", "PID"],
         labels={"Rewards balance": "Rewards Balance"},
         color_discrete_map=Number_to_color)
 
@@ -163,7 +158,7 @@ def rewards_visualize(df):
 def memory_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="Memory used", color="Number", line_group="Number",
-        custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", "Rewards balance", "Node", "PID"],
+        custom_data=["Number", "Memory used", "Node", "PID"],
         labels={"Memory": "Memory Usage (MB)"},
         color_discrete_map=Number_to_color)
 
@@ -210,18 +205,22 @@ def memory_visualize(df):
 def tcp_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="TCP connections (established)", color="Number", line_group="Number",
-        custom_data=["Number", "Records", "Disk usage", "Memory used", "CPU usage", "Rewards balance", "Node", "PID"],
+        custom_data=["Number", "PID"],
         labels={"Memory": "Memory Usage (MB)"},
         color_discrete_map=Number_to_color)
 
+    # Define a custom hovertemplate
+    hover_template = "%{customdata[1]}"
+
+    # Apply the custom hovertemplate to all traces
+    for trace in fig.data:
+        trace.hovertemplate = hover_template
 
     # Hide the x-axis labels (Timestamp)
     fig.update_layout(
         xaxis_title_text="TCP connections (established)",
         yaxis_title_text=""
     )
-    for trace in fig.data:
-        trace.hovertemplate = custom_hovertemplate
 
     fig.update_layout(
         hovermode='y unified',
@@ -262,13 +261,13 @@ def logarithmic_bubble_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
 
     fig = px.scatter(df, x="x", y="y", size="log_rewards", color="Number", hover_name="Node",
-                 hover_data=["Number", "Node", "Number", "Rewards balance", "Records"],
+                 hover_data=["Number", "Rewards balance"],
                  labels={"log_rewards": "Rewards Balance"},
                  color_discrete_map=Number_to_color,
                  size_max=100)
     
     fig.update_traces(
-        hovertemplate="Number: %{customdata[0]}<br>Node: %{customdata[1]}<br>Number: %{customdata[2]}<br>Rewards balance: %{customdata[3]:.9f}<br>Records: %{customdata[4]}<extra></extra>",  # Added Records here
+        hovertemplate="Number: %{customdata[0]}<br>Rewards balance: %{customdata[1]:.9f}<extra></extra>",
         marker=dict(line=dict(width=0.5, color='#252526')),
         selector=dict(mode='markers+text')
     )
@@ -288,7 +287,7 @@ def logarithmic_bubble_visualize(df):
     
     # Remove x and y from hover labels
     # Remove x and y from hover labels
-    fig.update_traces(hovertemplate="Number: %{customdata[0]}<br>Node: %{customdata[1]}<br>Rewards balance: %{customdata[3]:.9f}<br>Records: %{customdata[4]}<extra></extra>")
+    fig.update_traces(hovertemplate="Number: %{customdata[0]}<br>Rewards balance: %{customdata[1]:.9f}<extra></extra>")
 
     output_html_path = os.path.join(datadir, "bubble_rewards.html")
     fig.write_html(output_html_path) 
