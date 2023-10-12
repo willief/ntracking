@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
-datadir = os.path.join(user_home, "wyse_graphs")
+datadir = os.path.join(user_home, "ntracking")
 
 def convert_value(value, format_type, default=0):
     if format_type == 'float':
