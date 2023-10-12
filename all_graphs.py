@@ -3,13 +3,14 @@ import numpy as np
 import plotly.express as px
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from datetime import datetime, timedelta
 import os
 import glob
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
-datadir = os.path.join(user_home, "ntracking")
+datadir = os.path.join(user_home, "wyse_graphs")
 
 def convert_value(value, format_type, default=0):
     if format_type == 'float':
@@ -34,6 +35,40 @@ def convert_value(value, format_type, default=0):
             return default
     return value
 
+from datetime import datetime, timedelta
+
+def selective_data(data):
+    now = datetime.now()
+    limit_24h = now - timedelta(hours=24)
+    limit_48h = now - timedelta(hours=48)
+    limit_72h = now - timedelta(hours=72)
+    limit_120h = now - timedelta(hours=120)
+
+    refined_data = []
+
+    for record in data:
+        timestamp_str = record['Global (UTC) Timestamp']
+        timestamp = datetime.strptime(timestamp_str, '%a %b %d %H:%M:%S %Z %Y')
+
+        time_diff = now - timestamp
+        hours_diff = time_diff.total_seconds() / 3600  # Convert time difference to hours
+
+        if hours_diff <= 24:
+            interval = 0  # keep all
+        elif hours_diff <= 48:
+            interval = 15  # every 15 minutes
+        elif hours_diff <= 72:
+            interval = 30  # every 30 minutes
+        elif hours_diff <= 120:
+            interval = 60  # every hour
+        else:
+            interval = 240  # every 4 hours
+
+        if interval == 0 or (timestamp.minute == 0 and timestamp.hour % (interval // 60) == 0):
+            refined_data.append(record)
+
+    return refined_data
+
 
 def combined_extract_data(filenames):
     filenames = sorted(filenames)
@@ -47,7 +82,7 @@ def combined_extract_data(filenames):
             "Memory used": "float_mb",
             "Records": "int",
             "Disk usage": "float_mb",
-	        "TCP connections (established)": "int",
+            "TCP connections (established)": "int",
             "Rewards balance": "float",
             "Number": "int",
             "PID": "int"
@@ -83,9 +118,12 @@ def combined_extract_data(filenames):
                 idx += 1
 
         all_data.extend(data)
+    
+    # This line should be outside the for loop
+    filtered_data = selective_data(all_data)
 
     # DataFrame for rewards_visualize and memory_visualize
-    line_df = pd.DataFrame(all_data)
+    line_df = pd.DataFrame(filtered_data)
     line_df["Timestamp"] = pd.to_datetime(line_df["Global (UTC) Timestamp"], format='%a %b %d %H:%M:%S %Z %Y', errors='coerce')
     if line_df["Timestamp"].dt.tz is None:
         line_df["Timestamp"] = line_df["Timestamp"].dt.tz_localize('UTC')
