@@ -58,6 +58,7 @@ def main():
         entries, dead_nodes = parse_log(file_path)
         all_entries.extend(entries)
         all_dead_nodes.extend(dead_nodes)
+        all_dead_nodes = sorted(all_dead_nodes, key=lambda x: (x['LogNumber'], x['Number']), reverse=False)
 
     unique_entries = {}
     for entry in all_entries:
@@ -65,7 +66,7 @@ def main():
         if key not in unique_entries or unique_entries[key]['Timestamp'] < entry['Timestamp']:
             unique_entries[key] = entry
 
-    sorted_entries = sorted(unique_entries.values(), key=lambda x: x['Reward'], reverse=True)
+    sorted_entries = sorted(unique_entries.values(), key=lambda x: (x['LogNumber'], x['Number']), reverse=False)
     total_reward = sum([entry['Reward'] for entry in unique_entries.values()])
     
     running_nodes = set(entry['Node'] for entry in unique_entries.values() if entry['Status'] == 'running')
@@ -89,7 +90,7 @@ def main():
                 outfile.write(f"Rewards balance: {node['Reward']:.8f}\n")
                 outfile.write("---------\n\n")
     
-        outfile.write("=== Best Earners Descending ===\n\n")
+        outfile.write("=== All Live Nodes ===\n\n")
         
         for entry in sorted_entries:
             outfile.write(f"Number: {entry['LogNumber']}:{entry['Number']}\n")

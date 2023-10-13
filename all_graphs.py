@@ -51,7 +51,7 @@ def selective_data(data):
         timestamp = datetime.strptime(timestamp_str, '%a %b %d %H:%M:%S %Z %Y')
 
         time_diff = now - timestamp
-        hours_diff = time_diff.total_seconds() / 3600  # Convert time difference to hours
+        hours_diff = time_diff.total_seconds() / 3600
 
         if hours_diff <= 24:
             interval = 0  # keep all
@@ -119,7 +119,6 @@ def combined_extract_data(filenames):
 
         all_data.extend(data)
     
-    # This line should be outside the for loop
     filtered_data = selective_data(all_data)
 
     # DataFrame for rewards_visualize and memory_visualize
@@ -173,9 +172,6 @@ def rewards_visualize(df):
                     dict(count=1, label="24 hours", step="day", stepmode="backward"),
                     dict(count=3, label="3 days", step="day", stepmode="backward"),
                     dict(count=7, label="Week", step="day", stepmode="backward"),
-                    #dict(count=30, label="30 days", step="day", stepmode="backward"),
-                    #dict(count=3, label="3 months", step="month", stepmode="backward"),
-                    #dict(count=6, label="6 months", step="month", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -222,7 +218,7 @@ def memory_visualize(df):
                     dict(count=12, label=" 12 hours", step="hour", stepmode="backward"),
                     dict(count=1, label=" 24 hours", step="day", stepmode="backward"),
                     dict(count=3, label=" 3 days", step="day", stepmode="backward"),
-                    #dict(count=7, label=" Week", step="day", stepmode="backward"),
+                    dict(count=7, label=" Week", step="day", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -273,7 +269,7 @@ def tcp_visualize(df):
                     dict(count=12, label=" 12 hours", step="hour", stepmode="backward"),
                     dict(count=1, label=" 24 hours", step="day", stepmode="backward"),
                     dict(count=3, label=" 3 days", step="day", stepmode="backward"),
-                    #dict(count=7, label=" Week", step="day", stepmode="backward"),
+                    dict(count=7, label=" Week", step="day", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -334,12 +330,23 @@ log_files = glob.glob(os.path.join(datadir, "resources*.log"))
 
 
 def records_visualize(df):
+    if 'Number' in df.columns and df['Number'].str.contains(':').all():
+        df[['log_number', 'node_number']] = df['Number'].str.split(':', expand=True).astype(int)
+        df = df.sort_values(['log_number', 'node_number'], ascending=[True, True])
+        df = df.drop(['log_number', 'node_number'], axis=1)
+
+    else:
+        raise ValueError("Column 'Number' is missing or not in the expected format 'log_number:node_number'")
+
     df['Record Count'] = df['Records']
-    df = df.sort_values('Record Count', ascending=True)
+
+    # Remove duplicates, keeping the last entry per 'Number'
     df = df.drop_duplicates(subset='Number', keep='last')
-    df['Record Count'] = df['Records']
+
+    # Generate colors
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
 
+    # Create the bar plot
     fig = px.bar(
         df, 
         x="Number", 
@@ -350,6 +357,7 @@ def records_visualize(df):
         opacity=1.0
     )
     
+    # Update layout settings
     fig.update_layout(
         showlegend=False,
         paper_bgcolor='#252526',
