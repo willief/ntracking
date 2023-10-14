@@ -49,19 +49,25 @@ for dir_name in "${sorted_dirs[@]}"; do
   echo "Node: $dir_name"
   echo "PID: ${dir_pid[$dir_name]}"
 
-  # Retrieve process information
-  process_info=$(ps -o rss,%cpu -p "${dir_pid[$dir_name]}" | awk 'NR>1')
-  if [[ -n $process_info ]]; then
-      echo "Status: running"
-      echo "Memory used: $(awk '{print $1/1024 "MB"}' <<< "$process_info")"
-      echo "CPU usage: $(awk '{print $2"%"}' <<< "$process_info")"
-  else
-      echo "Status: killed"
-  fi
+# Retrieve process information
+process_info=$(ps -o rss,%cpu -p "${dir_pid[$dir_name]}" | awk 'NR>1')
+if [[ -n "$process_info" ]]; then
+    status="running"
+    mem_used=$(echo "$process_info" | awk '{print $1/1024 "MB"}')
+    cpu_usage=$(echo "$process_info" | awk '{print $2"%"}')
+    # Count established TCP connections
+    tcp_established=$(lsof -n -iTCP -a -p "${dir_pid[$dir_name]}" 2>/dev/null | grep -c "ESTABLISHED")
+else
+    status="killed"
+    mem_used="N/A"
+    cpu_usage="N/A"
+    tcp_established="N/A"
+fi
 
-  # Count established TCP connections
-  tcp_established=$(lsof -n -iTCP -a -p "${dir_pid[$dir_name]}" 2>/dev/null | grep -c "ESTABLISHED")
-  echo "TCP connections (established): $tcp_established"
+echo "Status: $status"
+echo "Memory used: $mem_used"
+echo "CPU usage: $cpu_usage"
+echo "TCP connections (established): $tcp_established"
 
   # Check for record store and report its details
   record_store_dir="$base_dir/$dir_name/record_store"
