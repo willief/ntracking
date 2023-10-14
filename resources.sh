@@ -50,7 +50,8 @@ for dir_name in "${sorted_dirs[@]}"; do
   echo "PID: ${dir_pid[$dir_name]}"
 
   # Retrieve process information
-  if process_info=$(ps -o rss,%cpu -p "${dir_pid[$dir_name]}" | awk 'NR>1'); then
+  process_info=$(ps -o rss,%cpu -p "${dir_pid[$dir_name]}" | awk 'NR>1')
+  if [[ -n $process_info ]]; then
       echo "Status: running"
       echo "Memory used: $(awk '{print $1/1024 "MB"}' <<< "$process_info")"
       echo "CPU usage: $(awk '{print $2"%"}' <<< "$process_info")"
