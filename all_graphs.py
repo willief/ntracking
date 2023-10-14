@@ -10,7 +10,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
-datadir = os.path.join(user_home, "wyse_graphs")
+datadir = os.path.join(user_home, "ntracking")
 
 def convert_value(value, format_type, default=0):
     if format_type == 'float':
@@ -37,13 +37,10 @@ def convert_value(value, format_type, default=0):
 
 from datetime import datetime, timedelta
 
+from datetime import datetime, timedelta
+
 def selective_data(data):
     now = datetime.now()
-    limit_24h = now - timedelta(hours=24)
-    limit_48h = now - timedelta(hours=48)
-    limit_72h = now - timedelta(hours=72)
-    limit_120h = now - timedelta(hours=120)
-
     refined_data = []
 
     for record in data:
@@ -51,20 +48,24 @@ def selective_data(data):
         timestamp = datetime.strptime(timestamp_str, '%a %b %d %H:%M:%S %Z %Y')
 
         time_diff = now - timestamp
-        hours_diff = time_diff.total_seconds() / 3600
+        hours_diff = time_diff.total_seconds() / 3600  # Convert time difference to hours
 
         if hours_diff <= 24:
-            interval = 0  # keep all
-        elif hours_diff <= 48:
-            interval = 15  # every 15 minutes
-        elif hours_diff <= 72:
             interval = 30  # every 30 minutes
+        elif hours_diff <= 48:
+            interval = 40  # every 40 minutes
+        elif hours_diff <= 72:
+            interval = 50  # every 50 minutes
         elif hours_diff <= 120:
             interval = 60  # every hour
         else:
             interval = 240  # every 4 hours
 
-        if interval == 0 or (timestamp.minute == 0 and timestamp.hour % (interval // 60) == 0):
+        # Calculate total minutes since the beginning of the day
+        total_minutes = timestamp.hour * 60 + timestamp.minute
+
+        # Check if the current time fits into the defined interval
+        if total_minutes % interval == 0:
             refined_data.append(record)
 
     return refined_data
@@ -99,10 +100,14 @@ def combined_extract_data(filenames):
                 while idx < len(lines) and "------------------------------------------" not in lines[idx]:
                     if ": " in lines[idx]:
                         key, raw_value = lines[idx].split(": ", 1)
-                        if key in formats:
+                        raw_value = raw_value.strip()  # Strip whitespace from the raw value
+
+                        if raw_value == "N/A":
+                            value = np.nan  # Set "N/A" values to numpy's NaN
+                        elif key in formats:
                             value = convert_value(raw_value, formats[key])
                         else:
-                            value = raw_value.strip()
+                            value = raw_value
 
                         if key == "Number":
                             entry_data[key] = f"{file_number + 1}:{value}"
@@ -119,6 +124,7 @@ def combined_extract_data(filenames):
 
         all_data.extend(data)
     
+    # This line should be outside the for loop
     filtered_data = selective_data(all_data)
 
     # DataFrame for rewards_visualize and memory_visualize
@@ -172,6 +178,9 @@ def rewards_visualize(df):
                     dict(count=1, label="24 hours", step="day", stepmode="backward"),
                     dict(count=3, label="3 days", step="day", stepmode="backward"),
                     dict(count=7, label="Week", step="day", stepmode="backward"),
+                    #dict(count=30, label="30 days", step="day", stepmode="backward"),
+                    #dict(count=3, label="3 months", step="month", stepmode="backward"),
+                    #dict(count=6, label="6 months", step="month", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -218,7 +227,7 @@ def memory_visualize(df):
                     dict(count=12, label=" 12 hours", step="hour", stepmode="backward"),
                     dict(count=1, label=" 24 hours", step="day", stepmode="backward"),
                     dict(count=3, label=" 3 days", step="day", stepmode="backward"),
-                    dict(count=7, label=" Week", step="day", stepmode="backward"),
+                    #dict(count=7, label=" Week", step="day", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -269,7 +278,7 @@ def tcp_visualize(df):
                     dict(count=12, label=" 12 hours", step="hour", stepmode="backward"),
                     dict(count=1, label=" 24 hours", step="day", stepmode="backward"),
                     dict(count=3, label=" 3 days", step="day", stepmode="backward"),
-                    dict(count=7, label=" Week", step="day", stepmode="backward"),
+                    #dict(count=7, label=" Week", step="day", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -338,6 +347,7 @@ def records_visualize(df):
     else:
         raise ValueError("Column 'Number' is missing or not in the expected format 'log_number:node_number'")
 
+    # Prepare the 'Record Count' column
     df['Record Count'] = df['Records']
 
     # Remove duplicates, keeping the last entry per 'Number'
