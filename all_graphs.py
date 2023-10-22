@@ -128,7 +128,7 @@ def combined_extract_data(filenames):
     filtered_data = selective_data(all_data)
 
     # DataFrame for rewards_visualize and memory_visualize
-    line_df = pd.DataFrame(filtered_data)
+    line_df = pd.DataFrame(all_data)
     line_df["Timestamp"] = pd.to_datetime(line_df["Global (UTC) Timestamp"], format='%a %b %d %H:%M:%S %Z %Y', errors='coerce')
     if line_df["Timestamp"].dt.tz is None:
         line_df["Timestamp"] = line_df["Timestamp"].dt.tz_localize('UTC')
