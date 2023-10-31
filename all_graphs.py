@@ -39,37 +39,6 @@ from datetime import datetime, timedelta
 
 from datetime import datetime, timedelta
 
-def selective_data(data):
-    now = datetime.now()
-    refined_data = []
-
-    for record in data:
-        timestamp_str = record['Global (UTC) Timestamp']
-        timestamp = datetime.strptime(timestamp_str, '%a %b %d %H:%M:%S %Z %Y')
-
-        time_diff = now - timestamp
-        hours_diff = time_diff.total_seconds() / 3600  # Convert time difference to hours
-
-        if hours_diff <= 24:
-            interval = 30  # every 30 minutes
-        elif hours_diff <= 48:
-            interval = 40  # every 40 minutes
-        elif hours_diff <= 72:
-            interval = 50  # every 50 minutes
-        elif hours_diff <= 120:
-            interval = 60  # every hour
-        else:
-            interval = 240  # every 4 hours
-
-        # Calculate total minutes since the beginning of the day
-        total_minutes = timestamp.hour * 60 + timestamp.minute
-
-        # Check if the current time fits into the defined interval
-        if total_minutes % interval == 0:
-            refined_data.append(record)
-
-    return refined_data
-
 
 def combined_extract_data(filenames):
     filenames = sorted(filenames)
@@ -124,8 +93,6 @@ def combined_extract_data(filenames):
 
         all_data.extend(data)
     
-    # This line should be outside the for loop
-    filtered_data = selective_data(all_data)
 
     # DataFrame for rewards_visualize and memory_visualize
     line_df = pd.DataFrame(all_data)
