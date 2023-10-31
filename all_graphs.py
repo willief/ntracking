@@ -3,7 +3,6 @@ import numpy as np
 import plotly.express as px
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-from datetime import datetime, timedelta
 import os
 import glob
 import warnings
@@ -34,11 +33,6 @@ def convert_value(value, format_type, default=0):
         except ValueError:
             return default
     return value
-
-from datetime import datetime, timedelta
-
-from datetime import datetime, timedelta
-
 
 def combined_extract_data(filenames):
     filenames = sorted(filenames)
@@ -93,7 +87,6 @@ def combined_extract_data(filenames):
 
         all_data.extend(data)
     
-
     # DataFrame for rewards_visualize and memory_visualize
     line_df = pd.DataFrame(all_data)
     line_df["Timestamp"] = pd.to_datetime(line_df["Global (UTC) Timestamp"], format='%a %b %d %H:%M:%S %Z %Y', errors='coerce')
@@ -115,22 +108,18 @@ def generate_Number_to_color(Number):
 # Visualization
 custom_hovertemplate = "%{customdata[3]}<br>"
 
-def rewards_visualize(df):
-    Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
-    fig = px.line(df, x="Timestamp", y="Rewards balance", color="Number", line_group="Number",
-        custom_data=["Number", "Rewards balance", "Node", "PID"],
-        labels={"Rewards balance": "Rewards Balance"},
-        color_discrete_map=Number_to_color)
-
-    # Hide the x-axis labels (Timestamp)
+def layout(fig, xaxis_title_text, hover_template):
+    
+    # Hide the x-axis labels
     fig.update_layout(
-        xaxis_title_text="Rewards Over Time",
+        xaxis_title_text=xaxis_title_text,
         yaxis_title_text=""
     )
-
+    
     for trace in fig.data:
-        trace.hovertemplate = custom_hovertemplate
+        trace.hovertemplate = hover_template
 
+    # General layout
     fig.update_layout(
         hovermode='y unified',
         paper_bgcolor='#252526',
@@ -144,10 +133,6 @@ def rewards_visualize(df):
                     dict(count=12, label="12 hours", step="hour", stepmode="backward"),
                     dict(count=1, label="24 hours", step="day", stepmode="backward"),
                     dict(count=3, label="3 days", step="day", stepmode="backward"),
-                    dict(count=7, label="Week", step="day", stepmode="backward"),
-                    #dict(count=30, label="30 days", step="day", stepmode="backward"),
-                    #dict(count=3, label="3 months", step="month", stepmode="backward"),
-                    #dict(count=6, label="6 months", step="month", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -160,7 +145,18 @@ def rewards_visualize(df):
         ),                
         yaxis=dict(showgrid=True, gridcolor='#171515', gridwidth=0.01),
         font=dict(color='#ffffff')
-    )                      
+    )
+    
+    return fig
+
+def rewards_visualize(df):
+    Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
+    fig = px.line(df, x="Timestamp", y="Rewards balance", color="Number", line_group="Number",
+        custom_data=["Number", "Rewards balance", "Node", "PID"],
+        labels={"Rewards balance": "Rewards Balance"},
+        color_discrete_map=Number_to_color)
+
+    fig = layout(fig, xaxis_title_text="Rewards Over Time", hover_template=custom_hovertemplate)                     
 
     output_html_path = os.path.join(datadir, "rewards_balance_plot.html")
     fig.write_html(output_html_path)
@@ -173,41 +169,7 @@ def memory_visualize(df):
         color_discrete_map=Number_to_color)
 
 
-    # Hide the x-axis labels (Timestamp)
-    fig.update_layout(
-        xaxis_title_text="Memory Over Time",
-        yaxis_title_text=""
-    )
-    for trace in fig.data:
-        trace.hovertemplate = custom_hovertemplate
-
-    fig.update_layout(
-        hovermode='y unified',
-        paper_bgcolor='#252526',
-        plot_bgcolor='#070D0D',
-        margin=dict(t=32, b=32, l=32, r=32, pad=2),
-        xaxis=dict(
-            rangeselector=dict(
-                buttons=[
-                    dict(count=3, label="3 hours", step="hour", stepmode="backward"),
-                    dict(count=6, label=" 6 hours", step="hour", stepmode="backward"),
-                    dict(count=12, label=" 12 hours", step="hour", stepmode="backward"),
-                    dict(count=1, label=" 24 hours", step="day", stepmode="backward"),
-                    dict(count=3, label=" 3 days", step="day", stepmode="backward"),
-                    #dict(count=7, label=" Week", step="day", stepmode="backward"),
-                    dict(step="all", label="All Data")
-                ],
-                font=dict(color="#ffffff"),
-                bgcolor='#424241'
-            ),
-            type="date",
-            showgrid=True, 
-            gridcolor='#171515', 
-            gridwidth=0.01
-        ),                
-        yaxis=dict(showgrid=True, gridcolor='#171515', gridwidth=0.01),
-        font=dict(color='#ffffff')
-    )  
+    fig = layout(fig, xaxis_title_text="Rewards Over Time", hover_template=custom_hovertemplate)
 
     output_html_path = os.path.join(datadir, "memory_usage_plot.html")
     fig.write_html(output_html_path) 
@@ -215,50 +177,11 @@ def memory_visualize(df):
 def tcp_visualize(df):
     Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
     fig = px.line(df, x="Timestamp", y="TCP connections (established)", color="Number", line_group="Number",
-        custom_data=["Number", "PID"],
+        custom_data=["Number", "Rewards balance", "Node", "PID"],
         labels={"Memory": "Memory Usage (MB)"},
         color_discrete_map=Number_to_color)
 
-    # Define a custom hovertemplate
-    hover_template = "%{customdata[1]}"
-
-    # Apply the custom hovertemplate to all traces
-    for trace in fig.data:
-        trace.hovertemplate = hover_template
-
-    # Hide the x-axis labels (Timestamp)
-    fig.update_layout(
-        xaxis_title_text="TCP connections (established)",
-        yaxis_title_text=""
-    )
-
-    fig.update_layout(
-        hovermode='y unified',
-        paper_bgcolor='#252526',
-        plot_bgcolor='#070D0D',
-        margin=dict(t=32, b=32, l=32, r=32, pad=2),
-        xaxis=dict(
-            rangeselector=dict(
-                buttons=[
-                    dict(count=3, label="3 hours", step="hour", stepmode="backward"),
-                    dict(count=6, label=" 6 hours", step="hour", stepmode="backward"),
-                    dict(count=12, label=" 12 hours", step="hour", stepmode="backward"),
-                    dict(count=1, label=" 24 hours", step="day", stepmode="backward"),
-                    dict(count=3, label=" 3 days", step="day", stepmode="backward"),
-                    #dict(count=7, label=" Week", step="day", stepmode="backward"),
-                    dict(step="all", label="All Data")
-                ],
-                font=dict(color="#ffffff"),
-                bgcolor='#424241'
-            ),
-            type="date",
-            showgrid=True, 
-            gridcolor='#171515', 
-            gridwidth=0.01
-        ),                
-        yaxis=dict(showgrid=True, gridcolor='#171515', gridwidth=0.01),
-        font=dict(color='#ffffff')
-    )  
+    fig = layout(fig, xaxis_title_text="Rewards Over Time", hover_template=custom_hovertemplate) 
 
     output_html_path = os.path.join(datadir, "tcp.html")
     fig.write_html(output_html_path)    
@@ -295,8 +218,6 @@ def logarithmic_bubble_visualize(df):
         showlegend=False
     )
     
-    # Remove x and y from hover labels
-    # Remove x and y from hover labels
     fig.update_traces(hovertemplate="Number: %{customdata[0]}<br>Rewards balance: %{customdata[1]:.9f}<extra></extra>")
 
     output_html_path = os.path.join(datadir, "bubble_rewards.html")
