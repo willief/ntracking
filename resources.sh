@@ -86,9 +86,6 @@ echo "Bandwidth Usage: $bandwidth_usage KB/s"
   # Retrieve and display rewards balance
   rewards_balance=$(${HOME}/.local/bin/safe wallet balance --peer-id="$dir_name" | grep -oP '(?<=: )\d+\.\d+')
   echo "Rewards balance: $rewards_balance"
-  # Latency
-  latency=$(ping -c 4 8.8.8.8 | tail -1| awk '{print $4}' | cut -d '/' -f 2)
-  echo "Latency to 8.8.8.8: $latency ms"
 
   echo
 done
@@ -103,6 +100,9 @@ done
 # Device Network Metrics
 device_bandwidth_usage=$(nload -m -u K -o 1000 -c 1 -i 10 -t 100 eth0 2>&1 | grep "Curr" | awk '{print $2}')
 echo "Total Bandwidth Usage: $device_bandwidth_usage KB/s"
+# Latency
+latency=$(ping -c 4 8.8.8.8 | tail -1| awk '{print $4}' | cut -d '/' -f 2)
+echo "Latency to 8.8.8.8: $latency ms"
 
 echo "------------------------------------------"
 
