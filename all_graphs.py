@@ -169,7 +169,7 @@ def memory_visualize(df):
         color_discrete_map=Number_to_color)
 
 
-    fig = layout(fig, xaxis_title_text="Rewards Over Time", hover_template=custom_hovertemplate)
+    fig = layout(fig, xaxis_title_text="Memory Over Time", hover_template=custom_hovertemplate)
 
     output_html_path = os.path.join(datadir, "memory_usage_plot.html")
     fig.write_html(output_html_path) 
@@ -181,7 +181,7 @@ def tcp_visualize(df):
         labels={"Memory": "Memory Usage (MB)"},
         color_discrete_map=Number_to_color)
 
-    fig = layout(fig, xaxis_title_text="Rewards Over Time", hover_template=custom_hovertemplate) 
+    fig = layout(fig, xaxis_title_text="TCP Connections", hover_template=custom_hovertemplate) 
 
     output_html_path = os.path.join(datadir, "tcp.html")
     fig.write_html(output_html_path)    
@@ -266,9 +266,13 @@ def records_visualize(df):
             gridcolor='#171515', 
             gridwidth=0.01,
         ),
+        xaxis=dict(
+            title="",  # This hides the x-axis title
+            showticklabels=False  # This hides the x-axis tick labels
+        ),
         font=dict(color='#ffffff')
     )
-    
+
     output_html_path = os.path.join(datadir, "records.html")
     fig.write_html(output_html_path)
 
