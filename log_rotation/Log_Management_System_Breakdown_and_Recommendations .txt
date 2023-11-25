@@ -1,0 +1,31 @@
+
+Log Management System Breakdown and Recommendations
+====================================================
+
+Log Generation
+--------------
+- Cron Job: Runs every X minutes to log resources and append the output to a log file named with the current date. (20min) by default.
+- Command: `*/20 * * * * /bin/bash $HOME/resources.sh >> $HOME/resources_$(date +\%Y\%m\%d).log 2>&1`
+- Script: `resources.sh`
+
+`log_rm.sh`
+------------
+- Script: Removes logs older than X days. (3) by default.
+- Cron Job: Runs daily at 5 minutes past midnight.
+- Command: `5 0 * * * /bin/bash $HOME/log_rm.sh`
+
+`sync_logs.sh`
+-------------------
+- Script: Uses rsync to synchronize logs from remote machines to a central machine.
+- execute_steps.sh: runs this script before log generation.
+
+`merge_logs.sh`
+-----------------------------
+- Script: Merges logs from the last X days into a single file for each machine (e.g., resources1.log).
+- execute_steps.sh: runs this script before log generation.
+
+
+Plotly Graph Generation
+------------------------
+- `execute_steps.sh` runs the graphing process at 2 minutes past every hour. 
+- Command: `2 * * * * /bin/bash /home/wyse/ntracking/execute_steps.sh >> /home/wyse/ntracking/cron.log 2>&1`

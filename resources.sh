@@ -57,8 +57,6 @@ if [[ -n "$process_info" ]]; then
     cpu_usage=$(echo "$process_info" | awk '{print $2"%"}')
     # Count established TCP connections
     tcp_established=$(lsof -n -iTCP -a -p "${dir_pid[$dir_name]}" 2>/dev/null | grep -c "ESTABLISHED")
-    # Bandwidth
-    bandwidth_usage=$(nload -m -u K -o 1000 -c 1 -i 5000 -t 100 -p "${dir_pid[$dir_name]}" 2>&1 | grep "Curr" | awk '{print $2}')
 else
     status="killed"
     mem_used="N/A"
@@ -70,8 +68,6 @@ echo "Status: $status"
 echo "Memory used: $mem_used"
 echo "CPU usage: $cpu_usage"
 echo "TCP connections (established): $tcp_established"
-echo "Bandwidth Usage: $bandwidth_usage KB/s"
-
 
   # Check for record store and report its details
   record_store_dir="$base_dir/$dir_name/record_store"
@@ -97,9 +93,6 @@ done
   done
 } > "$registry_file"
 
-# Device Network Metrics
-device_bandwidth_usage=$(nload -m -u K -o 1000 -c 1 -i 10 -t 100 eth0 2>&1 | grep "Curr" | awk '{print $2}')
-echo "Total Bandwidth Usage: $device_bandwidth_usage KB/s"
 # Latency
 latency=$(ping -c 4 8.8.8.8 | tail -1| awk '{print $4}' | cut -d '/' -f 2)
 echo "Latency to 8.8.8.8: $latency ms"

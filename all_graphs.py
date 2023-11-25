@@ -132,7 +132,7 @@ def layout(fig, xaxis_title_text, hover_template):
                     dict(count=6, label="6 hours", step="hour", stepmode="backward"),
                     dict(count=12, label="12 hours", step="hour", stepmode="backward"),
                     dict(count=1, label="24 hours", step="day", stepmode="backward"),
-                    dict(count=3, label="3 days", step="day", stepmode="backward"),
+                    dict(count=2, label="2 days", step="day", stepmode="backward"),
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
@@ -156,7 +156,7 @@ def rewards_visualize(df):
         labels={"Rewards balance": "Rewards Balance"},
         color_discrete_map=Number_to_color)
 
-    fig = layout(fig, xaxis_title_text="Rewards Over Time", hover_template=custom_hovertemplate)                     
+    fig = layout(fig, xaxis_title_text="Rewards", hover_template=custom_hovertemplate)                     
 
     output_html_path = os.path.join(datadir, "rewards_balance_plot.html")
     fig.write_html(output_html_path)
@@ -169,7 +169,7 @@ def memory_visualize(df):
         color_discrete_map=Number_to_color)
 
 
-    fig = layout(fig, xaxis_title_text="Memory Over Time", hover_template=custom_hovertemplate)
+    fig = layout(fig, xaxis_title_text="Memory", hover_template=custom_hovertemplate)
 
     output_html_path = os.path.join(datadir, "memory_usage_plot.html")
     fig.write_html(output_html_path) 
@@ -273,6 +273,33 @@ def records_visualize(df):
         font=dict(color='#ffffff')
     )
 
+    # Adding a range slider to the x-axis
+    fig.update_xaxes(
+        rangeslider_visible=True,
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1", step="all", stepmode="backward"),
+                dict(count=6, label="6", step="all", stepmode="backward"),
+                dict(step="all")
+            ])
+        )
+    )
+
+    # Adding a label for the range selector
+    fig.add_annotation(
+        x=0.5,
+        y=-0.35,
+        xref="paper",
+        yref="paper",
+        text="Range Selector",
+        showarrow=False,
+        font=dict(size=12, color="black"),
+        align="center",
+        bgcolor="white",
+        bordercolor="black",
+        borderwidth=1
+    )
+
     output_html_path = os.path.join(datadir, "records.html")
     fig.write_html(output_html_path)
 
@@ -288,3 +315,4 @@ if __name__ == "__main__":
     tcp_visualize(line_df)
     logarithmic_bubble_visualize(bubble_df)
     records_visualize(line_df)
+    
