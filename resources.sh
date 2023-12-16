@@ -17,6 +17,40 @@ if [[ ! -f $registry_file ]]; then
     fi
 fi
 
+# Check if curl is installed
+if ! command -v curl &> /dev/null
+then
+    echo "Error: curl is not installed. Please install curl to continue."
+    exit 1
+fi
+
+# Cache file and duration setup for IP address
+cache_file="ip_cache.txt"
+cache_duration=$((60*60*24))  # Cache duration in seconds, e.g., 24 hours
+
+# Function to fetch a new IP address
+fetch_new_ip() {
+    echo $(curl -s ifconfig.me)
+}
+
+# Check if cache file exists and is recent
+if [[ -f "$cache_file" ]]; then
+    last_update=$(stat -c %Y "$cache_file")
+    current_time=$(date +%s)
+    if (( current_time - last_update < cache_duration )); then
+        # Cache is still valid, use cached IP
+        public_ip_address=$(cat "$cache_file")
+    else
+        # Cache is outdated, fetch new IP and update cache
+        public_ip_address=$(fetch_new_ip)
+        echo "$public_ip_address" > "$cache_file"
+    fi
+else
+    # Cache file does not exist, fetch new IP and create cache
+    public_ip_address=$(fetch_new_ip)
+    echo "$public_ip_address" > "$cache_file"
+fi
+
 # Load node numbers from the registry
 while IFS=: read -r node_name number; do
     node_numbers["$node_name"]=$number
@@ -47,6 +81,7 @@ for dir_name in "${sorted_dirs[@]}"; do
   echo "Global (UTC) Timestamp: $(TZ='UTC' date +'%a %b %d %H:%M:%S %Z %Y')"
   echo "Number: ${node_numbers[$dir_name]}"
   echo "Node: $dir_name"
+  echo "Public IP Address: $public_ip_address"  # Use the cached/fetched IP address
   echo "PID: ${dir_pid[$dir_name]}"
 
 # Retrieve process information
@@ -57,6 +92,8 @@ if [[ -n "$process_info" ]]; then
     cpu_usage=$(echo "$process_info" | awk '{print $2"%"}')
     # Count established TCP connections
     tcp_established=$(lsof -n -iTCP -a -p "${dir_pid[$dir_name]}" 2>/dev/null | grep -c "ESTABLISHED")
+    # Bandwidth
+    bandwidth_usage=$(nload -m -u K -o 1000 -c 1 -i 5000 -t 100 -p "${dir_pid[$dir_name]}" 2>&1 | grep "Curr" | awk '{print $2}')
 else
     status="killed"
     mem_used="N/A"
@@ -68,6 +105,8 @@ echo "Status: $status"
 echo "Memory used: $mem_used"
 echo "CPU usage: $cpu_usage"
 echo "TCP connections (established): $tcp_established"
+echo "Bandwidth Usage: $bandwidth_usage KB/s"
+
 
   # Check for record store and report its details
   record_store_dir="$base_dir/$dir_name/record_store"
@@ -98,4 +137,3 @@ latency=$(ping -c 4 8.8.8.8 | tail -1| awk '{print $4}' | cut -d '/' -f 2)
 echo "Latency to 8.8.8.8: $latency ms"
 
 echo "------------------------------------------"
-
