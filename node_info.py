@@ -18,6 +18,9 @@ def parse_log(file_path):
     status_pattern = r"Status: (\w+)"
     disk_usage_pattern = r"Disk usage: ([\d.]+M)"
     cpu_usage_pattern = r"CPU usage: ([\d.]+%)"
+    memory_used_pattern = r"Memory used: ([\d.]+MB)"
+    records_pattern = r"Records: (\d+)"
+
 
     parsed_entries = []
     dead_nodes = []  # List to store killed nodes
@@ -35,8 +38,11 @@ def parse_log(file_path):
         status_match = re.search(status_pattern, entry)
         disk_usage_match = re.search(disk_usage_pattern, entry)
         cpu_usage_match = re.search(cpu_usage_pattern, entry)
+        records_match = re.search(records_pattern, entry)
+        memory_used_match = re.search(memory_used_pattern, entry)
 
-        if all([number_match, node_match, pid_match, reward_match, timestamp_match, status_match, ip_address_match, disk_usage_match, cpu_usage_match]):
+
+        if all([number_match, node_match, pid_match, memory_used_match, reward_match, reward_match, timestamp_match, status_match, ip_address_match, disk_usage_match, cpu_usage_match]):
             timestamp = datetime.strptime(timestamp_match.group(1), '%a %b %d %H:%M:%S UTC %Y')
             parsed_entry = {
                 'Number': int(number_match.group(1)),
@@ -46,8 +52,10 @@ def parse_log(file_path):
                 'Reward': float(reward_match.group(1)),
                 'Timestamp': timestamp,
                 'Status': status_match.group(1),
-                'Disk Usage': disk_usage_match.group(1),  # Corrected
-                'CPU Usage': cpu_usage_match.group(1),    # Corrected
+                'Disk Usage': disk_usage_match.group(1),
+                'CPU Usage': cpu_usage_match.group(1),
+                'Memory Used': memory_used_match.group(1),
+                'Records': int(records_match.group(1)),
                 'LogNumber': log_number
             }
             parsed_entries.append(parsed_entry)
@@ -109,6 +117,7 @@ def main():
                 outfile.write(f"Status: {node['Status']}\n")
                 outfile.write(f"Timestamp: {node['Timestamp'].strftime('%a %b %d %H:%M:%S UTC %Y')}\n")
                 outfile.write(f"Rewards balance: {node['Reward']:.8f}\n")
+                outfile.write(f"Records: {node['Records']}\n")
                 outfile.write("---------\n\n")
 
         outfile.write("=== All Live Nodes ===\n\n")
@@ -121,6 +130,8 @@ def main():
             outfile.write(f"Rewards balance: {entry['Reward']:.8f}\n")
             outfile.write(f"Disk Usage: {entry['Disk Usage']}\n")
             outfile.write(f"CPU Usage: {entry['CPU Usage']}\n")
+            outfile.write(f"Memory Used: {entry['Memory Used']}\n")
+            outfile.write(f"Records: {entry['Records']}\n")
             outfile.write("---------\n")
 
 
