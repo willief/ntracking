@@ -13,7 +13,7 @@ CURRENT_DATE=$(date +%Y%m%d)
 for file in "$LOG_DIR"/resources_*.log; do
   # Extract the date from the filename
   filename=$(basename "$file")
-  file_date=${filename:11:8}
+  file_date=${filename:10:8}
 
   # Validate and clean the date string
   if [[ $file_date =~ ^[0-9]{8}$ ]]; then
