@@ -77,7 +77,11 @@ def combined_extract_data(filenames):
                             entry_data[key] = value
 
                         if key == "PID":
-                            entry_data[key] = int(raw_value.strip())
+                            if raw_value: 
+                                entry_data[key] = int(raw_value)
+                            else:
+                                entry_data[key] = None 
+
 
                     idx += 1
                 data.append(entry_data)
