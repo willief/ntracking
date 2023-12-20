@@ -9,7 +9,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
-datadir = os.path.join(user_home, "ntracking")
+datadir = os.path.join(user_home, "Newntracking")
 
 def convert_value(value, format_type, default=0):
     if format_type == 'float':
@@ -46,7 +46,6 @@ def combined_extract_data(filenames):
             "Memory used": "float_mb",
             "Records": "int",
             "Disk usage": "float_mb",
-            "TCP connections (established)": "int",
             "Rewards balance": "float",
             "Number": "int",
             "PID": "int"
@@ -136,7 +135,7 @@ def layout(fig, xaxis_title_text, hover_template):
                     dict(step="all", label="All Data")
                 ],
                 font=dict(color="#ffffff"),
-                bgcolor='#424241',
+                bgcolor='#28282B',
                 x=0.02,  # Adjust this value to shift the buttons to the right
                 y=1.05,  # Adjust this value to shift the buttons vertically if needed
                 xanchor='left'  # Anchor the buttons to the left of the specified x position
@@ -176,27 +175,7 @@ def memory_visualize(df):
     fig = layout(fig, xaxis_title_text="Memory", hover_template=custom_hovertemplate)
 
     output_html_path = os.path.join(datadir, "memory_usage_plot.html")
-    fig.write_html(output_html_path) 
-
-def tcp_visualize(df):
-    Number_to_color = generate_Number_to_color(sorted(df['Number'].unique()))
-    fig = px.line(df, x="Timestamp", y="TCP connections (established)", color="Number", line_group="Number",
-        custom_data=["Number", "Rewards balance", "Node", "PID"],
-        labels={"Memory": "Memory Usage (MB)"},
-        color_discrete_map=Number_to_color)
-
-    fig = layout(fig, xaxis_title_text="TCP Connections", hover_template=custom_hovertemplate) 
-    fig.update_layout(
-        xaxis=dict(
-            showline=False,  # Removes the line along the x-axis
-            zeroline=False,  # Removes the zero line across the graph
-        ),
-        yaxis=dict(
-            zeroline=False,  # Also remove the zero line for the y-axis, if needed
-        )
-    )    
-    output_html_path = os.path.join(datadir, "tcp.html")
-    fig.write_html(output_html_path)    
+    fig.write_html(output_html_path)   
 
 def logarithmic_bubble_visualize(df):
     df["x"] = np.random.rand(len(df))
@@ -325,7 +304,6 @@ if __name__ == "__main__":
     line_df, bubble_df = combined_extract_data(log_files)
     rewards_visualize(line_df)
     memory_visualize(line_df)
-    tcp_visualize(line_df)
     logarithmic_bubble_visualize(bubble_df)
     records_visualize(line_df)
     
