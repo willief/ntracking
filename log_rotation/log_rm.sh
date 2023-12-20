@@ -4,7 +4,7 @@
 LOG_DIR="$HOME"
 
 # Define the age limit in days
-AGE_LIMIT=3
+AGE_LIMIT=2
 
 # Current date in YYYYMMDD format
 CURRENT_DATE=$(date +%Y%m%d)
