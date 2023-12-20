@@ -73,7 +73,7 @@ You can open the graphs directly or with ntracking.html.
 For ALL functionality of ntracking.html to work locally you will need to:
 `cd ntracking`
 `source /RPvenv/bin/activate`
-`python -m http.server`
+`python3 -m http.server`
 Open your browser and navigate to 
 `http://localhost:8000`
 Open `ntracking.html` from list of displayed files.
