@@ -107,12 +107,12 @@ def generate_Number_to_color(Number):
 # Visualization
 custom_hovertemplate = "%{customdata[3]}<br>"
 
-def layout(fig, xaxis_title_text, hover_template):
+def layout(fig, yaxis_title_text, hover_template):
     
     # Hide the x-axis labels
     fig.update_layout(
-        xaxis_title_text=xaxis_title_text,
-        yaxis_title_text=""
+        xaxis_title_text="",
+        yaxis_title_text=yaxis_title_text
     )
     
     for trace in fig.data:
@@ -120,14 +120,13 @@ def layout(fig, xaxis_title_text, hover_template):
 
     # General layout
     fig.update_layout(
-        hovermode='y unified',
+        hovermode='closest',
         paper_bgcolor='black',  # Set to black for the border effect
         plot_bgcolor='#070D0D',  # Keep the plot background color as is
-        margin=dict(t=1, b=1, l=1, r=1, pad=1),  # Adjust the margin for a thin border
+        margin=dict(t=1, b=1, l=2, r=1, pad=1),  # Adjust the margin for a thin border
         xaxis=dict(
             rangeselector=dict(
                 buttons=[
-                    dict(count=3, label="3 hours", step="hour", stepmode="backward"),
                     dict(count=6, label="6 hours", step="hour", stepmode="backward"),
                     dict(count=12, label="12 hours", step="hour", stepmode="backward"),
                     dict(count=1, label="24 hours", step="day", stepmode="backward"),
@@ -159,7 +158,7 @@ def rewards_visualize(df):
         labels={"Rewards balance": "Rewards Balance"},
         color_discrete_map=Number_to_color)
 
-    fig = layout(fig, xaxis_title_text="Rewards", hover_template=custom_hovertemplate)                     
+    fig = layout(fig, yaxis_title_text="Rewards", hover_template=custom_hovertemplate)                     
 
     output_html_path = os.path.join(datadir, "rewards_balance_plot.html")
     fig.write_html(output_html_path)
@@ -172,7 +171,7 @@ def memory_visualize(df):
         color_discrete_map=Number_to_color)
 
 
-    fig = layout(fig, xaxis_title_text="Memory", hover_template=custom_hovertemplate)
+    fig = layout(fig, yaxis_title_text="Memory", hover_template=custom_hovertemplate)
 
     output_html_path = os.path.join(datadir, "memory_usage_plot.html")
     fig.write_html(output_html_path)   
