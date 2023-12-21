@@ -102,9 +102,9 @@ def main():
 
     with open("node_info.txt", "w") as outfile:
         outfile.write("= NTracking =\n")
-        outfile.write(f"Rewards: {total_reward:.8f}\n")
+        outfile.write(f"Rewards: {total_reward:.9f}\n")
         outfile.write(f"Running: {len(running_nodes)}\n")
-        outfile.write(f"Dead: {len(killed_nodes)}\n\n")
+        outfile.write(f"Killed: {len(killed_nodes)}\n\n")
 
         if all_dead_nodes:
             outfile.write("=== Dead Nodes Details ===\n")
@@ -116,7 +116,7 @@ def main():
                 outfile.write(f"PID: {node['PID']}\n")
                 outfile.write(f"Status: {node['Status']}\n")
                 outfile.write(f"Timestamp: {node['Timestamp'].strftime('%a %b %d %H:%M:%S UTC %Y')}\n")
-                outfile.write(f"Rewards balance: {node['Reward']:.8f}\n")
+                outfile.write(f"Rewards balance: {node['Reward']:.9f}\n")
                 outfile.write(f"Records: {node['Records']}\n")
                 outfile.write("---------\n\n")
 
@@ -127,7 +127,7 @@ def main():
             outfile.write(f"Node: {entry['Node']}\n")
             outfile.write(f"Public IP Address: {anonymize_ip(entry['IP Address'])}\n")
             outfile.write(f"PID: {entry['PID']}\n")
-            outfile.write(f"Rewards balance: {entry['Reward']:.8f}\n")
+            outfile.write(f"Rewards balance: {entry['Reward']:.9f}\n")
             outfile.write(f"Disk Usage: {entry['Disk Usage']}\n")
             outfile.write(f"CPU Usage: {entry['CPU Usage']}\n")
             outfile.write(f"Memory Used: {entry['Memory Used']}\n")
