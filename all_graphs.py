@@ -72,7 +72,7 @@ def combined_extract_data(filenames):
                             value = raw_value
 
                         if key == "Number":
-                            entry_data[key] = f"{file_number}:{value}"
+                            entry_data[key] = f"{file_number +1}:{value}"
                         else:
                             entry_data[key] = value
 
