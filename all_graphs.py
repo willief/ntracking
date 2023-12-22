@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import os
 import glob
 import warnings
+import re
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 user_home = os.path.expanduser("~")
@@ -34,8 +35,18 @@ def convert_value(value, format_type, default=0):
             return default
     return value
 
+# Sort log files with leading 0
+def sort_log_files(file_list):
+    def extract_number(file_name):
+        # Extract the number from the file name using regular expression
+        match = re.search(r'(\d+)', file_name)
+        return int(match.group()) if match else 0
+
+    return sorted(file_list, key=extract_number)
+
+
 def combined_extract_data(filenames):
-    filenames = sorted(filenames)
+    filenames = sort_log_files(filenames)
     all_data = []
 
     for file_number, filename in enumerate(filenames):
