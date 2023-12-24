@@ -202,7 +202,7 @@ def logarithmic_bubble_visualize(df):
                  hover_data=["Number", "Rewards balance"],
                  labels={"log_rewards": "Rewards Balance"},
                  color_discrete_map=Number_to_color,
-                 size_max=100)
+                 size_max=50)
     
     fig.update_traces(
         hovertemplate="Number: %{customdata[0]}<br>Rewards balance: %{customdata[1]:.9f}<extra></extra>",
