@@ -96,9 +96,11 @@ def track_timestamps(current_run_data, last_run_data):
         else:
             last_timestamp = None
 
-        if last_timestamp is None or current_timestamp > last_timestamp:
-            latest_timestamps[node] = current_timestamp
-        else:
+        # Update latest timestamps regardless of comparison
+        latest_timestamps[node] = current_timestamp
+
+        # Flag nodes only if the current timestamp is not greater than the last timestamp
+        if last_timestamp and current_timestamp <= last_timestamp:
             flagged_nodes.append(entry)
 
     return flagged_nodes, latest_timestamps
