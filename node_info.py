@@ -11,7 +11,6 @@ def parse_log(file_path):
     # Required fields
     number_pattern = r"Number: (\d+)"
     node_pattern = r"Node: ([\w\d]+)"
-    ip_address_pattern = r"Public IP Address: ([\d\.]+)"
     pid_pattern = r"PID: (\d+)"
     reward_pattern = r"Rewards balance: ([\d.]+)"
     timestamp_pattern = r"Global \(UTC\) Timestamp: (.+?)\n"
@@ -31,7 +30,6 @@ def parse_log(file_path):
     for entry in entries:
         number_match = re.search(number_pattern, entry)
         node_match = re.search(node_pattern, entry)
-        ip_address_match = re.search(ip_address_pattern, entry)
         pid_match = re.search(pid_pattern, entry)
         reward_match = re.search(reward_pattern, entry)
         timestamp_match = re.search(timestamp_pattern, entry)
@@ -42,12 +40,11 @@ def parse_log(file_path):
         memory_used_match = re.search(memory_used_pattern, entry)
 
 
-        if all([number_match, node_match, pid_match, memory_used_match, reward_match, reward_match, timestamp_match, status_match, ip_address_match, disk_usage_match, cpu_usage_match]):
+        if all([number_match, node_match, pid_match, memory_used_match, reward_match, reward_match, timestamp_match, status_match, disk_usage_match, cpu_usage_match]):
             timestamp = datetime.strptime(timestamp_match.group(1), '%a %b %d %H:%M:%S UTC %Y')
             parsed_entry = {
                 'Number': int(number_match.group(1)),
                 'Node': node_match.group(1),
-                'IP Address': ip_address_match.group(1),
                 'PID': int(pid_match.group(1)),
                 'Reward': float(reward_match.group(1)),
                 'Timestamp': timestamp,
@@ -67,12 +64,6 @@ def parse_log(file_path):
                 dead_nodes.append(parsed_entry)
 
     return parsed_entries, dead_nodes
-
-def anonymize_ip(ip_address):
-    parts = ip_address.split('.')
-    if len(parts) == 4:
-        return f"xx.xx.{parts[2]}.{parts[3]}"
-    return ip_address  # Return the original if format is unexpected
 
 def main():
     all_entries = []
@@ -112,7 +103,6 @@ def main():
                 outfile.write(
                     f"Number: {node['LogNumber']}:{node['Number']}\n")
                 outfile.write(f"Node: {node['Node']}\n")
-                outfile.write(f"Public IP Address: {anonymize_ip(node['IP Address'])}\n")
                 outfile.write(f"PID: {node['PID']}\n")
                 outfile.write(f"Status: {node['Status']}\n")
                 outfile.write(f"Timestamp: {node['Timestamp'].strftime('%a %b %d %H:%M:%S UTC %Y')}\n")
@@ -125,7 +115,6 @@ def main():
         for entry in sorted_entries:
             outfile.write(f"Number: {entry['LogNumber']}:{entry['Number']}\n")
             outfile.write(f"Node: {entry['Node']}\n")
-            outfile.write(f"Public IP Address: {anonymize_ip(entry['IP Address'])}\n")
             outfile.write(f"PID: {entry['PID']}\n")
             outfile.write(f"Rewards balance: {entry['Reward']:.9f}\n")
             outfile.write(f"Disk Usage: {entry['Disk Usage']}\n")
