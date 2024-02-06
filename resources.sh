@@ -1,6 +1,8 @@
 #!/bin/bash
 
-registry_file="node_registry.conf"
+mkdir -p $HOME/.local/share/ntracking_working_folder/local_machine
+
+registry_file="$HOME/.local/share/ntracking_working_folder/local_machine/node_registry.conf"
 base_dir="${HOME}/.local/share/safe/node"
 
 declare -A dir_pid
